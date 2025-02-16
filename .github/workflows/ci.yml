@@ -70,11 +70,10 @@ jobs:
         name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: nebelschwimmer.site
+          host: ${{ secrets.SERVER_IP}}
           port: 2222
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          disable_strict_host_key_checking: true
           script: |
             whoami
             cd /app/
