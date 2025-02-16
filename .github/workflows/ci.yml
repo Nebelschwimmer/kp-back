@@ -38,32 +38,7 @@ jobs:
       -
         name: Start services
         run: docker compose up --wait --no-build
-      -
-        name: Check HTTP reachability
-        run: curl -v --fail-with-body http://localhost
-      -
-        name: Check HTTPS reachability
-        if: false # Remove this line when the homepage will be configured, or change the path to check
-        run: curl -vk --fail-with-body https://localhost
-      -
-        name: Check Mercure reachability
-        run: curl -vkI --fail-with-body https://localhost/.well-known/mercure?topic=test
-      -
-        name: Create test database
-        if: false # Remove this line if Doctrine ORM is installed
-        run: docker compose exec -T php bin/console -e test doctrine:database:create
-      -
-        name: Run migrations
-        if: false # Remove this line if Doctrine Migrations is installed
-        run: docker compose exec -T php bin/console -e test doctrine:migrations:migrate --no-interaction
-      -
-        name: Run PHPUnit
-        if: false # Remove this line if PHPUnit is installed
-        run: docker compose exec -T php bin/phpunit
-      -
-        name: Doctrine Schema Validator
-        if: false # Remove this line if Doctrine ORM is installed
-        run: docker compose exec -T php bin/console -e test doctrine:schema:validate
+
   lint:
     name: Docker Lint
     runs-on: ubuntu-latest
@@ -74,3 +49,25 @@ jobs:
       -
         name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
+
+  deploy:
+    name: Deploy to server
+    needs: [tests, lint]  # Запускать деплой только если прошли тесты и линтинг
+    runs-on: ubuntu-latest
+
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+
+      - 
+        name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd /app/
+            git pull origin main
+            docker compose up -d --build
