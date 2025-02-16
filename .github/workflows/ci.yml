@@ -49,19 +49,26 @@ jobs:
       -
         name: Lint Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
-      - name: Test SSH Connection
-        run: |
-          ssh -vvv -i ~/.ssh/id_ed25519 -p 2222 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} exit
       
   deploy:
     name: Deploy to server
-    needs: [tests, lint]  # Запускать деплой только если прошли тесты и линтинг
+    needs: [tests, lint]
     runs-on: ubuntu-latest
 
     steps:
       -
         name: Checkout
         uses: actions/checkout@v4
+      - 
+        name: Add known hosts
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+      - 
+        name: Test SSH Connection
+        run: |
+          ssh -vvv -i ~/.ssh/id_ed25519 -p 2222 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} exit
       - 
         name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.10
