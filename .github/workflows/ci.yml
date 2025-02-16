@@ -66,21 +66,17 @@ jobs:
           echo "StrictHostKeyChecking no" > ~/.ssh/config
           echo "UserKnownHostsFile=/dev/null" >> ~/.ssh/config
           chmod 600 ~/.ssh/config
-      - 
-        name: Configure SSH
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
       -
         name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.10
+        uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SERVER_IP }}
+          host: nebelschwimmer.site
+          port: 2222
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          port: 2222
           disable_strict_host_key_checking: true
           script: |
+            whoami
             cd /app/
             git pull origin main
             docker compose up -d --build
