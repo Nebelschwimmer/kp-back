@@ -70,6 +70,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           port: 2222
+          disable_strict_host_key_checking: true
           script: |
             cd /app/
             git pull origin main
