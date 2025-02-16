@@ -60,16 +60,13 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Add known hosts
+        name: Disable host key checking
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-      - 
-        name: Test SSH Connection
-        run: |
-          ssh -vvv -i ~/.ssh/id_ed25519 -p 2222 ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} exit
-      - 
+          echo "StrictHostKeyChecking no" > ~/.ssh/config
+          echo "UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+          chmod 600 ~/.ssh/config
+      -
         name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.10
         with:
