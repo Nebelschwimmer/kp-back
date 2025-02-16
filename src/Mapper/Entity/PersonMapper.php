@@ -8,6 +8,7 @@ use App\Model\Response\Entity\Person\PersonList;
 use App\Model\Response\Entity\Person\PersonListItem;
 use App\Entity\Film;
 use App\Enum\Specialty;
+use App\Entity\User;
 class PersonMapper
 {
   public function __construct(
@@ -31,6 +32,7 @@ class PersonMapper
       ->setId($person->getId())
       ->setName($person->getFullname())
       ->setAvatar($person->getAvatar() ?: '')
+      
     ;
   }
   public function mapToListItem(Person $person): PersonListItem
@@ -57,6 +59,9 @@ class PersonMapper
       ->setBio($person->getBio() ?: '')
       ->setCover($person->getCover() ?: '')
       ->setAvatar($person->getAvatar() ?: '')
+      ->setCreatedAt($person->getCreatedAt()->format('Y-m-d'))
+      ->setUpdatedAt($person->getUpdatedAt()->format('Y-m-d'))
+      ->setPublisherData($person->getPublisher() ? $this->mapPublisherData($person->getPublisher()) : [])
     ;
   }
 
@@ -108,6 +113,14 @@ class PersonMapper
       Specialty::tryFrom($specialtyId);
 
     }
+  }
+
+  private function mapPublisherData(User $publisher): array
+  {
+    return [
+      'id' => $publisher->getId(),
+      'name' => $publisher->getDisplayName(),
+    ];
   }
 
   private function mapSpecialtiesToIds(array $specialties)

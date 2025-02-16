@@ -79,7 +79,7 @@ enum Genres: int implements TranslatableInterface
         };
     }
 
-    public static function translateGenreIds(?TranslatorInterface $translator = null, string $locale, array $ids)
+    public static function translateGenreIds(string $locale, array $ids, ?TranslatorInterface $translator = null)
     {
         return array_map(function (int $id) use ($translator, $locale) {
             return self::matchIdAndGenre($id)->trans($translator, $locale);

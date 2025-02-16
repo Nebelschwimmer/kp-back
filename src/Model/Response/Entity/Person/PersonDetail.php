@@ -38,6 +38,12 @@ class PersonDetail
 
   public ?int $genderId = null;
 
+  public ?string $createdAt = null;
+
+  public ?string $updatedAt = null;
+
+  public ?array $publisherData = [];
+
 
   public function getId(): int
   {
@@ -192,5 +198,36 @@ class PersonDetail
 
     return $this;    
   }
+
+  public function setCreatedAt(string $createdAt): static
+  {
+    $this->createdAt = $createdAt;
+
+    return $this;
+  }
+
+  public function getUpdatedAt(): string
+  {
+    return $this->updatedAt;
+  }
+  public function setUpdatedAt(string $updatedAt): static
+  {
+    $this->updatedAt = $updatedAt;
+
+    return $this;
+  }
+
+  public function getPublisherData (): array
+  {
+    return $this->publisherData;
+  }
+  public function setPublisherData(array $publisherData): static
+  {
+    $this->publisherData = $publisherData;
+
+    return $this;
+  }
+
+  
 
 }

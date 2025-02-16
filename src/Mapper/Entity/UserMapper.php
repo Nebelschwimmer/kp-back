@@ -2,6 +2,7 @@
 namespace App\Mapper\Entity;
 use App\Entity\User;
 use App\Model\Response\Entity\User\UserDetail;
+use App\Entity\Assessment;
 
 class UserMapper
 {
@@ -17,5 +18,20 @@ class UserMapper
       ->setCover($user->getCover())
       ->setAvatar($user->getAvatar())
       ->setLastLogin($user->getLastLogin());
+      // ->setAssessmentsData($user->getAssessments()->toArray());
+  }
+
+  private function mapAssessmentsData(array $assessments): array
+  {
+    return array_map(function (Assessment $assessment) {
+      return [
+        'id' => $assessment->getId(),
+        
+        'comment' => $assessment->getComment(),
+        'rating' => $assessment->getRating(),
+        'createdAt' => $assessment->getCreatedAt(),
+      ];
+    } , $assessments);
+    
   }
 }

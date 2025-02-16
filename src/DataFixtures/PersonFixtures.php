@@ -7,11 +7,16 @@ use Doctrine\Persistence\ObjectManager;
 use App\Entity\Person;
 use App\Enum\Gender;
 use App\Enum\Specialty;
+use App\Repository\UserRepository;
 
 class PersonFixtures extends Fixture
 {
+    public function __construct(
+        private UserRepository $userRepository
+    ){}
     public function load(ObjectManager $manager): void
     {
+        $admin = 
         $firstnames = ['John', "Mary", "Mark", "Ben", "Sally"];
         $lastnames = ['Doe', "Smith", "Green", "Brown", "White"];
         $birthdays = ['1990-01-01', '1991-01-01', '1992-01-01', '1993-01-01', '1994-01-01'];
@@ -37,8 +42,15 @@ class PersonFixtures extends Fixture
             $person->setGender($genders[$i]);
             $person->setSpecialties($specialties);
             $person->setBio($bios[$i]);
+            $person->setPublisher($birthdays[$i]);
             $manager->persist($person);
         }
         $manager->flush();
+    }
+    public function getDependencies(): array
+    {
+        return [
+            UserFixtures::class,
+        ];
     }
 }

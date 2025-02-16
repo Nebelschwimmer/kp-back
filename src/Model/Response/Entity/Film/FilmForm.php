@@ -38,6 +38,8 @@ class FilmForm
 
   public ?int $age = null;
 
+  public ?array $genreIds = [];
+
 
   public array $gallery = [];
 
@@ -202,6 +204,18 @@ class FilmForm
   public function setAge(?int $age): static
   {
     $this->age = $age;
+
+    return $this;
+  }
+
+  public function getGenreIds(): ?array
+  {
+    return $this->genreIds;
+  }
+
+  public function setGenreIds(?array $genreIds): static
+  {
+    $this->genreIds = $genreIds;
 
     return $this;
   }

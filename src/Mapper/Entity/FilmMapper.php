@@ -20,7 +20,7 @@ class FilmMapper
   public function mapToEntityList(array $films): FilmList
   {
     $items = array_map(
-      fn(Film $film) => $this->mapToEntityListItem($film, new FilmListItem),
+      fn(Film $film) => $this->mapToEntityListItem($film, new FilmListItem($film->getId())),
       $films
     );
 
@@ -51,7 +51,7 @@ class FilmMapper
       ->setDuration($this->setFormattedDuration($film->getDuration()))
       ->setCover($film->getCover() ?: '')
       ->setAssessments($this->mapAssessments($film->getAssessments()->toArray()))
-      ->setRating($film->getRating() ?? 0.0)
+      ->setRating(number_format($film->getRating(), 1) ?? 0.0)
       ->setPublisherData($film->getPublisher() ? $this->mapPublisherData($film->getPublisher()) : [])
       ->setActorsData($film->getActors() ? $this->mapPersonsData($film->getActors()->toArray()) : [])
       ->setTeamData($this->mapFilmTeam($film))
@@ -71,7 +71,7 @@ class FilmMapper
       ->setId($film->getId())
       ->setSlogan($film->getSlogan())
       ->setName($film->getName())
-      ->setGenres($film->getGenres())
+      ->setGenreIds($this->mapGenresToIds($film->getGenres()))
       ->setReleaseYear($film->getReleaseYear())
       ->setActorIds($this->getActorsIds($film))
       ->setDirectorId($film->getDirectedBy() ? $film->getDirectedBy()->getId() : null)
@@ -93,7 +93,9 @@ class FilmMapper
       $film->getReleaseYear(),
       $film->getCover() ? $film->getCover() : '',
       $film->getDescription(),
-      $film->getRating()
+      $film->getRating(),
+      $this->mapAssessments($film->getAssessments()->toArray())
+
     );
   }
   private function getActorNames(Film $film): array
@@ -106,6 +108,16 @@ class FilmMapper
     }
 
     return $namesArr;
+  }
+
+  private function mapGenresToIds(array $genres): array
+  {
+    $ids = [];
+    foreach ($genres as $genre) {
+      $ids[] = $genre->value;
+    }
+
+    return $ids;
   }
 
   private function getActorAvatars(Film $film): array
@@ -126,16 +138,6 @@ class FilmMapper
     }
 
     return $idsArr;
-  }
-
-  private function mapGenresToIds(array $genres): array
-  {
-    $ids = [];
-    foreach ($genres as $genre) {
-      $ids[] = $genre->value;
-    }
-
-    return $ids;
   }
 
   private function mapAssessments(array $assessments): array
@@ -184,45 +186,45 @@ class FilmMapper
     $directorData = [];
     if ($film->getDirectedBy()) {
       $directorData = [
-        'id' => $film->getDirectedBy()->getId(),
-        'name' => $film->getDirectedBy()->getFullName(),
-        'avatar' => $film->getDirectedBy()->getAvatar(),
+        'id' => $film->getDirectedBy()->getId() ?? null,
+        'name' => $film->getDirectedBy()->getFullName() ?? null,
+        'avatar' => $film->getDirectedBy()->getAvatar() ?? null,
       ];
     }
 
     $writerData = [];
     if ($film->getWriter()) {
       $writerData = [
-        'id' => $film->getWriter()->getId(),
-        'name' => $film->getWriter()->getFullName(),
-        'avatar' => $film->getWriter()->getAvatar(),
+        'id' => $film->getWriter()->getId() ?? null,
+        'name' => $film->getWriter()->getFullName() ?? null,
+        'avatar' => $film->getWriter()->getAvatar() ?? null
       ];
     }
 
     $producerData = [];
     if ($film->getProducer()) {
       $producerData = [
-        'id' => $film->getProducer()->getId(),
-        'name' => $film->getProducer()->getFullName(),
-        'avatar' => $film->getProducer()->getAvatar(),
+        'id' => $film->getProducer()->getId() ?? null,
+        'name' => $film->getProducer()->getFullName() ?? null, 
+        'avatar' => $film->getProducer()->getAvatar() ?? null,
       ];
     }
 
     $composerData = [];
     if ($film->getComposer()) {
       $composerData = [
-        'id' => $film->getComposer()->getId(),
-        'name' => $film->getComposer()->getFullName(),
-        'avatar' => $film->getComposer()->getAvatar(),
+        'id' => $film->getComposer()->getId() ?? null,
+        'name' => $film->getComposer()->getFullName() ?? null,
+        'avatar' => $film->getComposer()->getAvatar() ?? null,
       ];
     }
 
     return array_map(
       function ($data) {
         return [
-          'id' => $data['id'],
-          'name' => $data['name'],
-          'avatar' => $data['avatar'],
+          'id' => $data['id'] ?? null,
+          'name' => $data['name'] ?? null,
+          'avatar' => $data['avatar'] ?? null,
         ];
       },
       [$directorData, $writerData, $producerData, $composerData]

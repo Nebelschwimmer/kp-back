@@ -37,9 +37,6 @@ class UserController extends AbstractController
         return $this->json( $mappedUser ?? null);
     }
 
-
-
-
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]
     public function register(#[MapRequestPayload] ?UserDto $userDto): Response
     {

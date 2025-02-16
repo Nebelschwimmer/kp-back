@@ -9,12 +9,13 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Enum\Gender;
 use App\Enum\Specialty;
-
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 #[ORM\Entity(repositoryClass: PersonRepository::class)]
 #[ORM\HasLifecycleCallbacks]
 class Person
 {
+  use TimestampableEntity;
   public const DEFAULT_GENDER = Gender::MALE;
 
   #[ORM\Id]

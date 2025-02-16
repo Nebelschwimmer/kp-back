@@ -24,6 +24,8 @@ class UserDetail
 
   public ?string $lastLogin;
 
+  public ?array $assessmentsData = [];
+
 
 
   public function getId(): int
@@ -130,6 +132,18 @@ class UserDetail
   public function setLastLogin(?string $lastLogin): static
   {
     $this->lastLogin = $lastLogin;
+
+    return $this;
+  }
+
+  public function getAssessmentsData(): ?array
+  {
+    return $this->assessmentsData;
+  }
+
+  public function setAssessmentsData(?array $assessmentsData): static
+  {
+    $this->assessmentsData = $assessmentsData;
 
     return $this;
   }

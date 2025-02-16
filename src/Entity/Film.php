@@ -34,7 +34,7 @@ class Film
   private ?string $description = null;
 
   #[ORM\Column(type: Types::FLOAT)]
-  private ?string $rating = null;
+  private ?float $rating = null;
 
   private string $preview = '';
 
@@ -85,7 +85,6 @@ class Film
 
   #[ORM\ManyToOne(inversedBy: 'publisher')]
   private ?User $publisher = null;
-
 
   public function __construct()
   {
@@ -208,6 +207,7 @@ class Film
 
     return $this;
   }
+
   public function getDescription(): ?string
   {
     return $this->description;
@@ -220,9 +220,9 @@ class Film
     return $this;
   }
 
-  public function getRating(): ?string
+  public function getRating(): ?float
   {
-    return number_format($this->rating, 1);
+    return $this->rating;
   }
 
   public function setRating(float $rating): static
@@ -239,87 +239,86 @@ class Film
 
   public function getDirectedBy(): ?Person
   {
-      return $this->directedBy;
+    return $this->directedBy;
   }
 
   public function setDirectedBy(?Person $directedBy): static
   {
-      $this->directedBy = $directedBy;
+    $this->directedBy = $directedBy;
 
-      return $this;
+    return $this;
   }
 
   public function getDuration(): ?\DateTimeImmutable
   {
-      return $this->duration;
+    return $this->duration;
   }
 
   public function setDuration(\DateTimeImmutable $duration): static
   {
-      $this->duration = $duration;
+    $this->duration = $duration;
 
-      return $this;
+    return $this;
   }
-
 
   public function getAge(): ?int
   {
-      return $this->age;
+    return $this->age;
   }
 
   public function setAge(int $age): static
   {
-      $this->age = $age;
+    $this->age = $age;
 
-      return $this;
+    return $this;
   }
 
   public function getSlogan(): ?string
   {
-      return $this->slogan;
+    return $this->slogan;
   }
 
   public function setSlogan(?string $slogan): static
   {
-      $this->slogan = $slogan;
+    $this->slogan = $slogan;
 
-      return $this;
+    return $this;
   }
 
   public function getProducer(): ?Person
   {
-      return $this->producer;
+    return $this->producer;
   }
 
   public function setProducer(?Person $producer): static
   {
-      $this->producer = $producer;
+    $this->producer = $producer;
 
-      return $this;
+    return $this;
   }
 
   public function getWriter(): ?Person
   {
-      return $this->writer;
+    return $this->writer;
   }
 
   public function setWriter(?Person $writer): static
   {
-      $this->writer = $writer;
+    $this->writer = $writer;
 
-      return $this;
+    return $this;
   }
 
   public function getComposer(): ?Person
   {
-      return $this->composer;
+    return $this->composer;
   }
 
   public function setComposer(?Person $composer): static
   {
-      $this->composer = $composer;
+    $this->composer = $composer;
 
-      return $this;
+    return $this;
   }
 
   /**
@@ -327,41 +326,41 @@ class Film
    */
   public function getAssessments(): Collection
   {
-      return $this->assessments;
+    return $this->assessments;
   }
 
   public function addAssessment(Assessment $assessment): static
   {
-      if (!$this->assessments->contains($assessment)) {
-          $this->assessments->add($assessment);
-          $assessment->setFilm($this);
-      }
+    if (!$this->assessments->contains($assessment)) {
+      $this->assessments->add($assessment);
+      $assessment->setFilm($this);
+    }
 
-      return $this;
+    return $this;
   }
 
   public function removeAssessment(Assessment $assessment): static
   {
-      if ($this->assessments->removeElement($assessment)) {
-          // set the owning side to null (unless already changed)
-          if ($assessment->getFilm() === $this) {
-              $assessment->setFilm(null);
-          }
+    if ($this->assessments->removeElement($assessment)) {
+      // set the owning side to null (unless already changed)
+      if ($assessment->getFilm() === $this) {
+        $assessment->setFilm(null);
       }
+    }
 
-      return $this;
+    return $this;
   }
 
   public function getCover(): ?string
   {
-      return $this->cover;
+    return $this->cover;
   }
 
   public function setCover(?string $cover): static
   {
-      $this->cover = $cover;
+    $this->cover = $cover;
 
-      return $this;
+    return $this;
   }
 
   /**
@@ -369,41 +368,40 @@ class Film
    */
   public function getActorRoles(): Collection
   {
-      return $this->actorRoles;
+    return $this->actorRoles;
   }
 
   public function addActorRole(ActorRole $actorRole): static
   {
-      if (!$this->actorRoles->contains($actorRole)) {
-          $this->actorRoles->add($actorRole);
-          $actorRole->setFilm($this);
-      }
+    if (!$this->actorRoles->contains($actorRole)) {
+      $this->actorRoles->add($actorRole);
+      $actorRole->setFilm($this);
+    }
 
-      return $this;
+    return $this;
   }
 
   public function removeActorRole(ActorRole $actorRole): static
   {
-      if ($this->actorRoles->removeElement($actorRole)) {
-          // set the owning side to null (unless already changed)
-          if ($actorRole->getFilm() === $this) {
-              $actorRole->setFilm(null);
-          }
+    if ($this->actorRoles->removeElement($actorRole)) {
+      // set the owning side to null (unless already changed)
+      if ($actorRole->getFilm() === $this) {
+        $actorRole->setFilm(null);
       }
+    }
 
-      return $this;
+    return $this;
   }
 
   public function getPublisher(): ?User
   {
-      return $this->publisher;
+    return $this->publisher;
   }
 
   public function setPublisher(?User $publisher): static
   {
-      $this->publisher = $publisher;
+    $this->publisher = $publisher;
 
-      return $this;
+    return $this;
   }
-
 }

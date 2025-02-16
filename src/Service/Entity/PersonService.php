@@ -17,6 +17,7 @@ use App\Repository\PersonRepository;
 use App\Service\FileSystemService;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use App\Entity\User;
+use App\Repository\UserRepository;
 
 class PersonService
 {
@@ -26,6 +27,7 @@ class PersonService
         private PersonMapper $personMapper,
         private FileSystemService $fileSystemService,
         private TranslatorInterface $translator,
+        private UserRepository $userRepository,
     ) {
     }
     public function get(int $id, ?string $locale = null): PersonDetail
@@ -52,16 +54,15 @@ class PersonService
         return $form;
     }
 
-    public function create(PersonDto $dto): PersonForm
+    public function create(PersonDto $dto, #[CurrentUser] User $user): PersonForm
     {
         $person = new Person();
-
-
         $person
             ->setFirstname($dto->firstname)
             ->setLastname($dto->lastname)
             ->setBirthday($dto->birthday)
             ->setGender($dto->genderId)
+            ->setPublisher($user)
         ;
         if ($dto->bio !== null) {
             $person->setBio($dto->bio);
@@ -77,6 +78,7 @@ class PersonService
         $person->setSpecialties($specialties);
 
         $this->repository->store($person);
+        $this->userRepository->store($user);
 
         return $this->findForm($person->getId());
     }
@@ -159,7 +161,7 @@ class PersonService
     {
         $person = $this->find($id);
         $dirName = $this->specifyPersonPhotosPath($person->getId());
-        $currentFile = $this->fileSystemService->searchFiles($dirName, )[0] ?? null;
+        $currentFile = $this->fileSystemService->searchFiles($dirName, 'cover')[0] ?? null;
         if (null !== $currentFile) {
             $this->fileSystemService->removeFile($currentFile);
         }
@@ -177,6 +179,7 @@ class PersonService
     private function setPhotosPaths(int $id): array
     {
         $photosDirPath = $this->specifyPersonPhotosPath($id);
+        
         $photoFiles = $this->fileSystemService->searchFiles($photosDirPath, 'photo-*');
         $shortPaths = [];
 
@@ -335,12 +338,26 @@ class PersonService
         $composersList = $this->personMapper->mapToEntityList($composers);
 
         return [
-            'actors' =>  $actorsList,
+            'actors' => $actorsList,
             'directors' => $directorsList,
             'producers' => $producersList,
             'writers' => $writersList,
             'composers' => $composersList
         ];
+    }
+
+    public function listPopularActors(): PersonList
+    {
+        $actors = $this->listActors();
+        $popularActors = [];
+        foreach ($actors as $actor) {
+            if (count($actor->getFilms()) > 2) {
+                $popularActors[] = $actor;
+            }
+        }
+
+        return $this->personMapper->mapToEntityList($popularActors);
+
     }
 
 

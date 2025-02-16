@@ -5,7 +5,7 @@ use OpenApi\Attributes as OA;
 
 class FilmListItem
 {
-  public function __construct(?int $id = null, ?string $name, int $releaseYear, ?string $cover = null, ?string $description = null, ?string $rating = null)
+  public function __construct(?int $id, ?string $name = null, int $releaseYear = null, ?string $cover = null, ?string $description = null, ?string $rating = null, array $assessments = [])
   {
     $this->id = $id;
     $this->name = $name;
@@ -13,6 +13,7 @@ class FilmListItem
     $this->cover = $cover;
     $this->description = $description;
     $this->rating = $rating;
+    $this->assessments = $assessments;
 
   }
   #[OA\Property(example: 1)]
@@ -32,6 +33,8 @@ class FilmListItem
 
   #[OA\Property(example: '4')]
   public string $rating = '';
+
+  public array $assessments = [];
 
 
 
@@ -114,6 +117,18 @@ class FilmListItem
     $this->rating = $rating;
 
     return $this;
+  }
+
+  public function setAssessments(array $assessments): static
+  {
+    $this->assessments = $assessments;
+
+    return $this;
+  }
+
+  public function getAssessments(): array
+  {
+    return $this->assessments;
   }
 
 

@@ -150,6 +150,7 @@ class PersonController extends AbstractController
 
 	public function create(
 		#[MapRequestPayload] ?PersonDto $dto,
+		#[CurrentUser] User $user,
 	): Response {
 		$data = null;
 		$status = Response::HTTP_OK;
@@ -157,7 +158,7 @@ class PersonController extends AbstractController
 		try {
 			$user = $this->getUser();
 
-			$data = $this->personService->create($dto, );
+			$data = $this->personService->create($dto, $user);
 		} catch (\Throwable $e) {
 			$this->logger->error($e);
 			$data = $e->getMessage();
@@ -384,6 +385,37 @@ class PersonController extends AbstractController
 
 		try {
 			$data = $this->personService->listSpecialists();
+		} catch (\Throwable $e) {
+			$this->logger->error($e);
+			$data = $e->getMessage();
+			$status = Response::HTTP_INTERNAL_SERVER_ERROR;
+		}
+
+		return $this->json($data, $status);
+	}
+
+	/**
+	 * Get popular actors
+	 */
+	#[Route(
+		path: 'api/persons/actors-popular',
+		name: 'api_person_actors_popular',
+		methods: ['GET']
+	)]
+	#[OA\Response(
+		response: 200,
+		description: 'Get popular actors',
+	)]
+	#[OA\Response(response: 500, description: 'An error occurred ')]
+
+	public function popluar(): Response
+	{
+
+		$data = null;
+		$status = Response::HTTP_OK;
+
+		try {
+			$data = $this->personService->listPopularActors();
 		} catch (\Throwable $e) {
 			$this->logger->error($e);
 			$data = $e->getMessage();
