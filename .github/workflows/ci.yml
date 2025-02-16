@@ -67,6 +67,7 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: 2222
           script: |
             cd /app/
             git pull origin main
