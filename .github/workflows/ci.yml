@@ -76,7 +76,14 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             whoami
-            cd /app/
-            git pull origin main
+            cd ~
+            if [ -d "kp-back" ]; then
+              echo "Deleting old project..."
+              rm -rf kp-back
+            fi
+            echo "Cloning repository..."
+            git clone --depth=1 https://github.com/Nebelschwimmer/kp-back.git
+            cd kp-back
+            echo "Starting Docker Compose..."
             docker compose up -d --build
 
