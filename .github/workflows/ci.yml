@@ -75,15 +75,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            set -e
             whoami
-
-            if [ ! -d "~/kp-back/.git" ]; then
-              git clone https://github.com/Nebelschwimmer/kp-back.git ~/kp-back
-            fi
-            
-            cd ~/kp-back
+            cd ~/kp-back || git clone https://github.com/Nebelschwimmer/kp-back.git && cd kp-back
             git pull origin main
-
             docker compose down
             docker compose up -d
