@@ -71,6 +71,7 @@ class FilmService
       fn(Film $film) => $this->filmMapper->mapToListItem($film),
       $films
     );
+
     foreach ($items as $item) {
       $galleryPaths = $this->setGalleryPaths($item->getId());
       $item->setGallery($galleryPaths);
@@ -91,6 +92,7 @@ class FilmService
       fn(Film $film) => $this->filmMapper->mapToDetail($film, new FilmDetail(), $locale),
       $films
     );
+
     foreach ($items as $item) {
       $galleryPaths = $this->setGalleryPaths($item->getId());
       $item->setGallery($galleryPaths);
@@ -155,7 +157,6 @@ class FilmService
       }
     }
 
-
     $film
       ->setName($dto->name)
       ->setReleaseYear($dto->releaseYear)
@@ -202,25 +203,29 @@ class FilmService
 
     $producerId = $dto->producerId;
     $producer = $this->personRepository->find($producerId);
+    
     if (null === $producer) {
       throw new PersonNotFoundException();
     }
+
     $film->setProducer($producer);
 
     $writerId = $dto->writerId;
     $writer = $this->personRepository->find($writerId);
+    
     if (null === $writer) {
       throw new PersonNotFoundException();
     }
+
     $film->setWriter($writer);
 
     $composerId = $dto->composerId;
     $composer = $this->personRepository->find($composerId);
+    
     if (null === $composer) {
       throw new PersonNotFoundException();
     }
     $film->setComposer($composer);
-
 
     $film
       ->setName($dto->name)
@@ -234,6 +239,7 @@ class FilmService
     if ($dto->cover !== null) {
       $film->setCover($dto->cover);
     }
+
     $this->repository->store($film);
 
     return $this->get($film->getId(), $locale);
@@ -243,9 +249,11 @@ class FilmService
   {
     $film = $this->find($id);
     $galleryFiles = $this->fileSystemService->searchFiles($this->specifyFilmGalleryPath($id), 'picture-*');
+    
     foreach ($galleryFiles as $file) {
       $this->fileSystemService->removeFile($file);
     }
+
     $this->repository->remove($film);
   }
 
@@ -258,11 +266,13 @@ class FilmService
     $currentFiles = $this->fileSystemService->searchFiles($dirName, 'picture-*');
 
     $currentFileIndexes = [];
+    
     foreach ($currentFiles as $file) {
       if (preg_match('/picture-(\d+)/', $file, $matches)) {
         $currentFileIndexes[] = (int) $matches[1];
       }
     }
+
     $maxIndex = !empty($currentFileIndexes) ? max($currentFileIndexes) : 0;
 
     foreach ($files as $file) {
@@ -280,6 +290,7 @@ class FilmService
     $film = $this->find($id);
     $dirName = $this->specifyFilmGalleryPath($film->getId());
     $foundPictures = [];
+
     foreach ($fileNames as $fileName) {
       $foundPictures[] = $this->fileSystemService->searchFiles($dirName, $fileName);
     }
@@ -347,6 +358,7 @@ class FilmService
     if ($dto->comment !== null) {
       $assessment->setComment($dto->comment);
     }
+
     $film->addAssessment($assessment);
     $filmAssessments = $film->getAssessments();
 
@@ -371,6 +383,7 @@ class FilmService
   private function find(int $id): Film
   {
     $film = $this->repository->find($id);
+    
     if (null === $film) {
       throw new FilmNotFoundException();
     }
