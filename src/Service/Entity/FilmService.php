@@ -62,6 +62,7 @@ class FilmService
     return $form;
   }
 
+
   public function latest(): FilmList
   {
     $films = $this->repository->findLatest();
@@ -178,35 +179,26 @@ class FilmService
   {
     $film = $this->find($id);
     $actorIds = $dto->actorIds;
-
     foreach ($actorIds as $actorId) {
       $actor = $this->personRepository->find($actorId);
       if (null === $actor) {
         throw new PersonNotFoundException();
       }
-      if ($film->getActors() === null || !$film->getActors()->contains($actor)) {
-        $film->removeActor($actor);
-      }
-        $film->addActor($actor);
-
+      $film->addActor($actor);
       $this->personRepository->store($actor);
     }
 
     $directorId = $dto->directorId;
     $director = $this->personRepository->find($directorId);
-
     if (null === $director) {
       throw new PersonNotFoundException();
     }
-
     $film->setDirectedBy($director);
     $genreIds = $dto->genreIds;
     $genres = [];
-
     foreach ($genreIds as $genreId) {
       $genres[] = Genres::matchIdAndGenre($genreId);
     }
-
     $film->setGenres($genres);
 
     $producerId = $dto->producerId;
@@ -233,7 +225,6 @@ class FilmService
     if (null === $composer) {
       throw new PersonNotFoundException();
     }
-    
     $film->setComposer($composer);
 
     $film
