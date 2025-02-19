@@ -16,7 +16,7 @@ class PersonFixtures extends Fixture
     ){}
     public function load(ObjectManager $manager): void
     {
-        $admin = 
+        $admin =  $this->userRepository->findOneBy(["username"=> "admin"]);
         $firstnames = ['John', "Mary", "Mark", "Ben", "Sally"];
         $lastnames = ['Doe', "Smith", "Green", "Brown", "White"];
         $birthdays = ['1990-01-01', '1991-01-01', '1992-01-01', '1993-01-01', '1994-01-01'];
