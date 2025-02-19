@@ -38,20 +38,10 @@ jobs:
             *.cache-to=type=gha,scope=${{github.ref}},mode=max
       -
         name: Start services
-        run: docker compose up --wait --no-build
-      -
-        name: Wait for database
         run: |
-          docker compose exec php bash -c "while ! nc -z database 5432; do sleep 1; done"
+          docker compose down
+          docker compose up --no-build
       -
-        name: Install Composer dependencies
-        run: docker compose exec php composer install --no-interaction --prefer-dist --optimize-autoloader
-      -
-        name: Show logs
-        run: docker compose logs php
-      -
-        name: Run tests
-        run: docker compose exec php bin/phpunit
 
   lint:
     name: Docker Lint
