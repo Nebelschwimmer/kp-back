@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250209141716 extends AbstractMigration
+final class Version20250218080259 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -36,7 +36,7 @@ final class Version20250209141716 extends AbstractMigration
         $this->addSql('CREATE TABLE film_person (film_id INT NOT NULL, person_id INT NOT NULL, PRIMARY KEY(film_id, person_id))');
         $this->addSql('CREATE INDEX IDX_5F2EEC7C567F5183 ON film_person (film_id)');
         $this->addSql('CREATE INDEX IDX_5F2EEC7C217BBB47 ON film_person (person_id)');
-        $this->addSql('CREATE TABLE person (id SERIAL NOT NULL, publisher_id INT DEFAULT NULL, lastname VARCHAR(255) NOT NULL, firstname VARCHAR(255) NOT NULL, gender SMALLINT NOT NULL, birthday TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, age SMALLINT DEFAULT NULL, specialties JSON NOT NULL, bio TEXT DEFAULT NULL, cover VARCHAR(255) DEFAULT NULL, avatar VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE person (id SERIAL NOT NULL, publisher_id INT DEFAULT NULL, lastname VARCHAR(255) NOT NULL, firstname VARCHAR(255) NOT NULL, gender SMALLINT NOT NULL, birthday TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, age SMALLINT DEFAULT NULL, specialties JSON NOT NULL, bio TEXT DEFAULT NULL, cover VARCHAR(255) DEFAULT NULL, avatar VARCHAR(255) DEFAULT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, updated_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_34DCD17640C86FCE ON person (publisher_id)');
         $this->addSql('COMMENT ON COLUMN person.birthday IS \'(DC2Type:datetime_immutable)\'');
         $this->addSql('CREATE TABLE refresh_tokens (id SERIAL NOT NULL, refresh_token VARCHAR(128) NOT NULL, username VARCHAR(255) NOT NULL, valid TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, PRIMARY KEY(id))');
