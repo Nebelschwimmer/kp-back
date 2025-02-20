@@ -4,9 +4,9 @@ namespace App\Repository;
 
 use App\Dto\Entity\Query\FilmQueryDto;
 use App\Entity\Film;
+use App\Repository\Traits\ActionTrait;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use App\Repository\Traits\ActionTrait;
 
 /**
  * @extends ServiceEntityRepository<Film>
@@ -14,23 +14,21 @@ use App\Repository\Traits\ActionTrait;
 class FilmRepository extends ServiceEntityRepository
 {
 	use ActionTrait;
+
 	public function __construct(ManagerRegistry $registry)
 	{
 		parent::__construct($registry, Film::class);
 	}
 
-
 	public function filterByQueryParams(FilmQueryDto $filmQueryDto): array
 	{
-
 		$search = $filmQueryDto->search;
 		$offset = $filmQueryDto->offset;
 		$limit = $filmQueryDto->limit;
 		$sortBy = $filmQueryDto->sortBy;
 		$order = $filmQueryDto->order;
 
-		$queryBuilder = $this->createQueryBuilder('f')->where('1 = 1');
-		;
+		$queryBuilder = $this->createQueryBuilder('f')->where('1 = 1');;
 
 		if (!empty($search)) {
 			$search = trim(strtolower($search));
@@ -48,21 +46,35 @@ class FilmRepository extends ServiceEntityRepository
 
 	public function total(): int
 	{
-		return $this->createQueryBuilder('f')
+		return $this
+			->createQueryBuilder('f')
 			->select('COUNT(f.id)')
 			->getQuery()
-			->getSingleScalarResult()
-		;
+			->getSingleScalarResult();
 	}
 
-	public function findLatest(): array
+	public function findLatest(int $count): array
 	{
-		return $this->createQueryBuilder('f')
+		return $this
+			->createQueryBuilder('f')
 			->orderBy('f.releaseYear', 'DESC')
-			->setMaxResults(5)
+			->setMaxResults($count)
 			->getQuery()
-			->getResult()
-		;
+			->getResult();
 	}
 
+	// public function findWithSimilarGenres(array $genreIds): array
+	// {
+	// 	$queryBuilder = $this->createQueryBuilder('f');
+	
+	// 	$orX = $queryBuilder->expr()->orX();
+	// 	foreach ($genreIds as $genreId) {
+	// 		$orX->add("JSON_CONTAINS(f.genres, :genre_$genreId) = 1");
+	// 		$queryBuilder->setParameter("genre_$genreId", $genreId);
+	// 	}
+	
+	// 	$queryBuilder->where($orX);
+	
+	// 	return $queryBuilder->getQuery()->getResult();
+	// }
 }

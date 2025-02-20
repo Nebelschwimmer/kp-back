@@ -63,9 +63,9 @@ class FilmService
     return $form;
   }
 
-  public function latest(): FilmList
+  public function latest(int $count): FilmList
   {
-    $films = $this->repository->findLatest();
+    $films = $this->repository->findLatest($count);
 
     $items = array_map(
       fn(Film $film) => $this->filmMapper->mapToListItem($film),
@@ -78,6 +78,29 @@ class FilmService
     }
 
     return new FilmList($items);
+  }
+
+  public function similarGenre(int $id): FilmList
+  {
+    $film = $this->find($id);
+    $genres = $film->getGenres();
+    $genreIds = [];
+    foreach ( $genres as $genre ) {
+      $genreIds[] = $genre->value;
+    }
+    $films = $this->repository->findWithSimilarGenres($genreIds);
+    $items = array_map(
+      fn(Film $film) => $this->filmMapper->mapToListItem($film),
+      $films
+    );
+
+    foreach ($items as $item) {
+      $galleryPaths = $this->setGalleryPaths($item->getId());
+      $item->setGallery($galleryPaths);
+    }
+
+    return new FilmList($items);
+
   }
 
   public function filter(FilmQueryDto $filmQueryDto): FilmPaginateList
@@ -364,12 +387,12 @@ class FilmService
     }
 
     $film->addAssessment($assessment);
-    $filmAssessments = $film->getAssessments();
+    $filmAssessments = $film->getAssessments()->toArray();
 
     $film->setRating(
       array_sum(array_map(function (Assessment $assessment) {
         return $assessment->getRating();
-      }, $filmAssessments->toArray())) / count($filmAssessments)
+      }, $filmAssessments)) / count($filmAssessments)
     );
 
     $this->assessmentRepository->store($assessment);
