@@ -1,9 +1,10 @@
 <?php
 namespace App\Service\Entity;
 
-use App\Dto\Entity\PersonDto;
 use App\Dto\Entity\Query\PersonQueryDto;
+use App\Dto\Entity\PersonDto;
 use App\Entity\Person;
+use App\Entity\User;
 use App\Enum\Specialty;
 use App\Exception\NotFound\PersonNotFoundException;
 use App\Mapper\Entity\PersonMapper;
@@ -11,13 +12,12 @@ use App\Model\Response\Entity\Person\PersonDetail;
 use App\Model\Response\Entity\Person\PersonForm;
 use App\Model\Response\Entity\Person\PersonList;
 use App\Model\Response\Entity\Person\PersonPaginateList;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Repository\FilmRepository;
 use App\Repository\PersonRepository;
+use App\Repository\UserRepository;
 use App\Service\FileSystemService;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
-use App\Entity\User;
-use App\Repository\UserRepository;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class PersonService
 {
@@ -28,12 +28,13 @@ class PersonService
         private FileSystemService $fileSystemService,
         private TranslatorInterface $translator,
         private UserRepository $userRepository,
-    ) {
-    }
+    ) {}
+
     public function get(int $id, ?string $locale = null): PersonDetail
     {
         $person = $this->find($id);
-        $personDetail = $this->personMapper
+        $personDetail = $this
+            ->personMapper
             ->mapToDetail($person, new PersonDetail(), $locale);
 
         $photoPaths = $this->setPhotosPaths($id);
@@ -62,8 +63,7 @@ class PersonService
             ->setLastname($dto->lastname)
             ->setBirthday($dto->birthday)
             ->setGender($dto->genderId)
-            ->setPublisher($user)
-        ;
+            ->setPublisher($user);
         if ($dto->bio !== null) {
             $person->setBio($dto->bio);
         }
@@ -110,7 +110,9 @@ class PersonService
             $person->setAvatar($dto->avatar);
         }
 
-        $person->setCover($dto->cover);
+        if ($dto->cover !== null) {
+            $person->setCover($dto->cover);
+        }
 
         $this->repository->store($person);
 
@@ -166,7 +168,7 @@ class PersonService
             $this->fileSystemService->removeFile($currentFile);
         }
         $this->fileSystemService->upload($file, $dirName, 'cover');
-        $fullPath = $this->fileSystemService->searchFiles($dirName)[0] ?? '';
+        $fullPath = $this->fileSystemService->searchFiles($dirName, 'cover')[0] ?? '';
         $shortPath = $this->fileSystemService->getShortPath($fullPath);
         if (file_exists($fullPath)) {
             $person->setCover($shortPath);
@@ -176,51 +178,6 @@ class PersonService
         return $this->findForm($person->getId());
     }
 
-    private function setPhotosPaths(int $id): array
-    {
-        $photosDirPath = $this->specifyPersonPhotosPath($id);
-        
-        $photoFiles = $this->fileSystemService->searchFiles($photosDirPath, 'photo-*');
-        $shortPaths = [];
-
-        foreach ($photoFiles as $file) {
-            $shortPaths[] = $this->fileSystemService->getShortPath($file);
-        }
-
-        return $shortPaths;
-    }
-
-    private function specifyPersonPhotosPath(int $id): string
-    {
-        $subDirByIdPath = $this->createUploadsDir($id);
-
-        $photosDirPath = $subDirByIdPath . DIRECTORY_SEPARATOR . 'photos';
-        $this->fileSystemService->createDir($photosDirPath);
-
-        return $photosDirPath;
-    }
-
-    private function specifyCoverPath(int $id): string
-    {
-        $person = $this->find($id);
-        $dirName = $this->specifyPersonPhotosPath($person->getId());
-
-        $files = $this->fileSystemService->searchFiles($dirName, 'cover');
-
-        return $this->fileSystemService->getShortPath($files[0] ?? '');
-    }
-
-    private function createUploadsDir(int $id): string
-    {
-        $personBaseUploadsDir = $this->fileSystemService->getUploadsDirname('person');
-
-        $stringId = strval($id);
-        $subDirByIdPath = $personBaseUploadsDir . DIRECTORY_SEPARATOR . $stringId;
-
-        $this->fileSystemService->createDir($subDirByIdPath);
-
-        return $subDirByIdPath;
-    }
 
     public function deletePhotos(int $id, array $fileNames): PersonForm
     {
@@ -357,13 +314,10 @@ class PersonService
         }
 
         return $this->personMapper->mapToEntityList($popularActors);
-
     }
-
 
     public function filter(PersonQueryDto $personQueryDto): PersonPaginateList
     {
-
         $persons = $this->repository->filterByQueryParams($personQueryDto);
         $total = $this->repository->total();
         $totalPages = 1;
@@ -426,4 +380,49 @@ class PersonService
         return $person;
     }
 
+    private function setPhotosPaths(int $id): array
+    {
+        $photosDirPath = $this->specifyPersonPhotosPath($id);
+
+        $photoFiles = $this->fileSystemService->searchFiles($photosDirPath, 'photo-*');
+        $shortPaths = [];
+
+        foreach ($photoFiles as $file) {
+            $shortPaths[] = $this->fileSystemService->getShortPath($file);
+        }
+
+        return $shortPaths;
+    }
+
+    private function specifyPersonPhotosPath(int $id): string
+    {
+        $subDirByIdPath = $this->createUploadsDir($id);
+
+        $photosDirPath = $subDirByIdPath . DIRECTORY_SEPARATOR . 'photos';
+        $this->fileSystemService->createDir($photosDirPath);
+
+        return $photosDirPath;
+    }
+
+    private function specifyCoverPath(int $id): string
+    {
+        $person = $this->find($id);
+        $dirName = $this->specifyPersonPhotosPath($person->getId());
+
+        $files = $this->fileSystemService->searchFiles($dirName, 'cover');
+
+        return $this->fileSystemService->getShortPath($files[0] ?? '');
+    }
+
+    private function createUploadsDir(int $id): string
+    {
+        $personBaseUploadsDir = $this->fileSystemService->getUploadsDirname('person');
+
+        $stringId = strval($id);
+        $subDirByIdPath = $personBaseUploadsDir . DIRECTORY_SEPARATOR . $stringId;
+
+        $this->fileSystemService->createDir($subDirByIdPath);
+
+        return $subDirByIdPath;
+    }
 }

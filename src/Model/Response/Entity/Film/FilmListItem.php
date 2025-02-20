@@ -36,8 +36,6 @@ class FilmListItem
 
   public array $assessments = [];
 
-
-
   public function getId(): int
   {
     return $this->id;

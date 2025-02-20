@@ -2,10 +2,14 @@
 
 namespace App\Service\Entity;
 
-use App\Dto\Entity\ActorRoleDto;
-use App\Dto\Entity\FilmDto;
 use App\Dto\Entity\Query\FilmQueryDto;
+use App\Dto\Entity\ActorRoleDto;
+use App\Dto\Entity\AssessmentDto;
+use App\Dto\Entity\FilmDto;
+use App\Entity\ActorRole;
+use App\Entity\Assessment;
 use App\Entity\Film;
+use App\Entity\User;
 use App\Enum\Genres;
 use App\Exception\NotFound\FilmNotFoundException;
 use App\Exception\NotFound\PersonNotFoundException;
@@ -21,11 +25,7 @@ use App\Repository\FilmRepository;
 use App\Repository\PersonRepository;
 use App\Repository\UserRepository;
 use App\Service\FileSystemService;
-use App\Entity\Assessment;
-use App\Dto\Entity\AssessmentDto;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
-use App\Entity\User;
-use App\Entity\ActorRole;
 
 class FilmService
 {
@@ -38,11 +38,12 @@ class FilmService
     private PersonMapper $personMapper,
     private FileSystemService $fileSystemService,
     private ActorRoleRepository $actorRoleRepository
-  ) {
-  }
+  ) {}
+
   public function get(int $id, ?string $locale = null): FilmDetail
   {
-    $filmDetail = $this->filmMapper
+    $filmDetail = $this
+      ->filmMapper
       ->mapToDetail($this->find($id), new FilmDetail(), $locale);
 
     $galleryPaths = $this->setGalleryPaths($id);
@@ -62,7 +63,6 @@ class FilmService
     return $form;
   }
 
-
   public function latest(): FilmList
   {
     $films = $this->repository->findLatest();
@@ -71,6 +71,7 @@ class FilmService
       fn(Film $film) => $this->filmMapper->mapToListItem($film),
       $films
     );
+
     foreach ($items as $item) {
       $galleryPaths = $this->setGalleryPaths($item->getId());
       $item->setGallery($galleryPaths);
@@ -91,6 +92,7 @@ class FilmService
       fn(Film $film) => $this->filmMapper->mapToDetail($film, new FilmDetail(), $locale),
       $films
     );
+
     foreach ($items as $item) {
       $galleryPaths = $this->setGalleryPaths($item->getId());
       $item->setGallery($galleryPaths);
@@ -146,7 +148,6 @@ class FilmService
     $film->setComposer($composer);
     $roleNames = $dto->roleNames ?? [];
     if (count($roleNames) !== 0) {
-
       foreach ($roleNames as $roleName) {
         $role = new ActorRole();
         $role->setName($roleName);
@@ -154,7 +155,6 @@ class FilmService
         $this->actorRoleRepository->store($role);
       }
     }
-
 
     $film
       ->setName($dto->name)
@@ -164,12 +164,10 @@ class FilmService
       ->setAge($dto->age)
       ->setSlogan($dto->slogan)
       ->setRating(0)
-      ->setPublisher($user)
-    ;
+      ->setPublisher($user);
 
     $this->repository->store($film);
     $this->userRepository->store($user);
-
 
     return $this->findForm($film->getId());
   }
@@ -178,49 +176,63 @@ class FilmService
   {
     $film = $this->find($id);
     $actorIds = $dto->actorIds;
+
+    $newActors = [];
     foreach ($actorIds as $actorId) {
-      $actor = $this->personRepository->find($actorId);
-      if (null === $actor) {
+      $newActor = $this->personRepository->find($actorId);
+
+      if (null === $newActor) {
         throw new PersonNotFoundException();
       }
-      $film->addActor($actor);
-      $this->personRepository->store($actor);
+
+      $newActors[] = $newActor;
+      $this->personRepository->store($newActor);
     }
+
+    $film->updateActors($newActors);
 
     $directorId = $dto->directorId;
     $director = $this->personRepository->find($directorId);
+
     if (null === $director) {
       throw new PersonNotFoundException();
     }
+
     $film->setDirectedBy($director);
     $genreIds = $dto->genreIds;
     $genres = [];
+
     foreach ($genreIds as $genreId) {
       $genres[] = Genres::matchIdAndGenre($genreId);
     }
+
     $film->setGenres($genres);
 
     $producerId = $dto->producerId;
     $producer = $this->personRepository->find($producerId);
+
     if (null === $producer) {
       throw new PersonNotFoundException();
     }
+
     $film->setProducer($producer);
 
     $writerId = $dto->writerId;
     $writer = $this->personRepository->find($writerId);
+
     if (null === $writer) {
       throw new PersonNotFoundException();
     }
+
     $film->setWriter($writer);
 
     $composerId = $dto->composerId;
     $composer = $this->personRepository->find($composerId);
+
     if (null === $composer) {
       throw new PersonNotFoundException();
     }
     $film->setComposer($composer);
-
 
     $film
       ->setName($dto->name)
@@ -228,12 +240,12 @@ class FilmService
       ->setDuration($dto->duration)
       ->setDescription($dto->description)
       ->setAge($dto->age)
-      ->setSlogan($dto->slogan)
-    ;
+      ->setSlogan($dto->slogan);
 
     if ($dto->cover !== null) {
       $film->setCover($dto->cover);
     }
+
     $this->repository->store($film);
 
     return $this->get($film->getId(), $locale);
@@ -243,13 +255,13 @@ class FilmService
   {
     $film = $this->find($id);
     $galleryFiles = $this->fileSystemService->searchFiles($this->specifyFilmGalleryPath($id), 'picture-*');
+
     foreach ($galleryFiles as $file) {
       $this->fileSystemService->removeFile($file);
     }
+
     $this->repository->remove($film);
   }
-
-
 
   public function uploadGallery(int $id, array $files): FilmForm
   {
@@ -258,11 +270,13 @@ class FilmService
     $currentFiles = $this->fileSystemService->searchFiles($dirName, 'picture-*');
 
     $currentFileIndexes = [];
+
     foreach ($currentFiles as $file) {
       if (preg_match('/picture-(\d+)/', $file, $matches)) {
         $currentFileIndexes[] = (int) $matches[1];
       }
     }
+
     $maxIndex = !empty($currentFileIndexes) ? max($currentFileIndexes) : 0;
 
     foreach ($files as $file) {
@@ -276,10 +290,10 @@ class FilmService
 
   public function deleteFromGallery(int $id, array $fileNames): FilmForm
   {
-
     $film = $this->find($id);
     $dirName = $this->specifyFilmGalleryPath($film->getId());
     $foundPictures = [];
+
     foreach ($fileNames as $fileName) {
       $foundPictures[] = $this->fileSystemService->searchFiles($dirName, $fileName);
     }
@@ -303,10 +317,8 @@ class FilmService
       $shortPaths[] = $this->fileSystemService->getShortPath($file);
     }
 
-
     return $shortPaths;
   }
-
 
   private function specifyFilmGalleryPath(int $id): string
   {
@@ -330,8 +342,12 @@ class FilmService
     return $subDirByIdPath;
   }
 
-  public function assess(int $id, AssessmentDto $dto,  ?string $locale, #[CurrentUser] User $user,): FilmDetail
-  {
+  public function assess(
+    int $id,
+    AssessmentDto $dto,
+    ?string $locale,
+    #[CurrentUser] User $user,
+  ): FilmDetail {
     $film = $this->find($id);
 
     if (null === $user) {
@@ -342,11 +358,11 @@ class FilmService
     $assessment
       ->setFilm($film)
       ->setAuthor($user)
-      ->setRating($dto->rating)
-    ;
+      ->setRating($dto->rating);
     if ($dto->comment !== null) {
       $assessment->setComment($dto->comment);
     }
+
     $film->addAssessment($assessment);
     $filmAssessments = $film->getAssessments();
 
@@ -371,11 +387,11 @@ class FilmService
   private function find(int $id): Film
   {
     $film = $this->repository->find($id);
+
     if (null === $film) {
       throw new FilmNotFoundException();
     }
 
     return $film;
   }
-
 }
