@@ -63,18 +63,14 @@ class FilmRepository extends ServiceEntityRepository
 			->getResult();
 	}
 
-	// public function findWithSimilarGenres(array $genreIds): array
-	// {
-	// 	$queryBuilder = $this->createQueryBuilder('f');
+	public function findWithSimilarGenres(array $genreIds): array
+	{
+		$queryBuilder = $this->createQueryBuilder('f');
+		
+		$queryBuilder->where('f.genres @> :genreIds')
+					 ->setParameter('genreIds', '{' . implode(',', $genreIds) . '}', \Doctrine\DBAL\Types\Types::STRING);
+		
+		return $queryBuilder->getQuery()->getResult();
+	}
 	
-	// 	$orX = $queryBuilder->expr()->orX();
-	// 	foreach ($genreIds as $genreId) {
-	// 		$orX->add("JSON_CONTAINS(f.genres, :genre_$genreId) = 1");
-	// 		$queryBuilder->setParameter("genre_$genreId", $genreId);
-	// 	}
-	
-	// 	$queryBuilder->where($orX);
-	
-	// 	return $queryBuilder->getQuery()->getResult();
-	// }
 }
