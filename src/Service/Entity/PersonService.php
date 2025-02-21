@@ -328,35 +328,9 @@ class PersonService
         $totalPages = 1;
         $currentPage = 1;
         $locale = $personQueryDto->locale ?? 'ru';
-        if ($personQueryDto->limit !== 'all') {
+        if ($personQueryDto->limit !== 0) {
             $totalPages = intval(ceil($total / $personQueryDto->limit));
             $currentPage = $personQueryDto->offset / $personQueryDto->limit + 1;
-        }
-        if ($personQueryDto->specialty !== 'all') {
-            switch ($personQueryDto->specialty) {
-                case 'director':
-                    $persons = $this->listDirectors();
-                    break;
-                case 'actor':
-                    $persons = $this->listActors();
-                    break;
-                case 'producer':
-                    $persons = $this->listProducers();
-                    break;
-                case 'writer':
-                    $persons = $this->listWriters();
-                    break;
-                case 'composer':
-                    $persons = $this->listComposers();
-                    break;
-            }
-
-            $items = array_map(
-                fn(Person $person) => $this->personMapper->mapToDetail($person, new PersonDetail(), $locale),
-                $persons
-            );
-
-            return new PersonPaginateList($items, $totalPages, $currentPage);
         }
         $items = array_map(
             fn(Person $person) => $this->personMapper->mapToDetail($person, new PersonDetail(), $locale),

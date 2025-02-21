@@ -34,13 +34,16 @@ class FilmRepository extends ServiceEntityRepository
 			$search = trim(strtolower($search));
 			$queryBuilder
 				->where($queryBuilder->expr()->like('LOWER(f.name)', ':search'))
-				->orWhere($queryBuilder->expr()->like('f.releaseYear', ':search'))
 				->setParameter('search', "%{$search}%");
 		}
 		$queryBuilder
-			->orderBy("f.{$sortBy}", $order)
-			->setFirstResult($offset)
-			->setMaxResults($limit);
+			->orderBy("f.{$sortBy}", $order);
+		if ($limit !== 0) {
+			$queryBuilder
+				->setMaxResults($limit)
+				->setFirstResult($offset);
+		}
+
 		return $queryBuilder->getQuery()->getResult();
 	}
 
@@ -66,11 +69,11 @@ class FilmRepository extends ServiceEntityRepository
 	public function findWithSimilarGenres(array $genreIds): array
 	{
 		$queryBuilder = $this->createQueryBuilder('f');
-		
-		$queryBuilder->where('f.genres @> :genreIds')
-					 ->setParameter('genreIds', '{' . implode(',', $genreIds) . '}', \Doctrine\DBAL\Types\Types::STRING);
-		
+
+		$queryBuilder
+			->where('f.genres @> :genreIds')
+			->setParameter('genreIds', '{' . implode(',', $genreIds) . '}', \Doctrine\DBAL\Types\Types::STRING);
+
 		return $queryBuilder->getQuery()->getResult();
 	}
-	
 }
