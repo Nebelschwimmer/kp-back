@@ -85,9 +85,11 @@ class FilmService
     $film = $this->find($id);
     $genres = $film->getGenres();
     $genreIds = [];
+    
     foreach ( $genres as $genre ) {
       $genreIds[] = $genre->value;
     }
+    
     $films = $this->repository->findWithSimilarGenres($genreIds);
     $items = array_map(
       fn(Film $film) => $this->filmMapper->mapToListItem($film),

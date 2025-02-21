@@ -7,29 +7,34 @@ class PersonDetail
 {
   #[OA\Property(example: 1)]
   public ?int $id;
+
   #[OA\Property(example: 'John')]
   public ?string $firstname;
+
   #[OA\Property(example: 'Doe')]
   public ?string $lastname;
+
   #[OA\Property(example: '')]
   public ?array $photos = [];
+
   #[OA\Property(example: 'male')]
   public ?string $gender;
+
   #[OA\Property(example: '1984-01-01')]
   public ?string $birthday;
-  
+
   #[OA\Property(example: [1, 2])]
   public ?array $specialtyIds = [];
 
   #[OA\Property(example: ['actor', 'director'])]
   public ?array $specialtyNames = [];
 
-  #[OA\Property(example: [2, 3])]
-  public array $actedInFilms = [];
   #[OA\Property(example: 25)]
   public int $age = 0;
+
   #[OA\Property(example: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.')]
   public ?string $bio;
+
   #[OA\Property(example: 'cover.jpg')]
   public ?string $cover = null;
 
@@ -44,6 +49,7 @@ class PersonDetail
 
   public ?array $publisherData = [];
 
+  public ?array $filmWorks = [];
 
   public function getId(): int
   {
@@ -56,16 +62,19 @@ class PersonDetail
 
     return $this;
   }
+
   public function getFirstname(): string
   {
     return $this->firstname;
   }
+
   public function setFirstname(string $firstname): static
   {
     $this->firstname = $firstname;
 
     return $this;
   }
+
   public function getLastname(): string
   {
     return $this->lastname;
@@ -82,6 +91,7 @@ class PersonDetail
   {
     return $this->photos;
   }
+
   public function setPhotos(array $photos): static
   {
     $this->photos = $photos;
@@ -93,6 +103,7 @@ class PersonDetail
   {
     return $this->gender;
   }
+
   public function setGender(string $gender): static
   {
     $this->gender = $gender;
@@ -104,6 +115,7 @@ class PersonDetail
   {
     return $this->birthday;
   }
+
   public function setBirthday(string $birthday): static
   {
     $this->birthday = $birthday;
@@ -111,20 +123,11 @@ class PersonDetail
     return $this;
   }
 
-  public function getActedInFilms(): array
-  {
-    return $this->actedInFilms;
-  }
-  public function setActedInFilms(array $actedInFilms): static
-  {
-    $this->actedInFilms = $actedInFilms;
-
-    return $this;
-  }
   public function getSpecialtyIds(): array
   {
     return $this->specialtyIds;
   }
+
   public function setSpecialtyIds(array $specialtyIds): static
   {
     $this->specialtyIds = $specialtyIds;
@@ -136,6 +139,7 @@ class PersonDetail
   {
     return $this->specialtyNames;
   }
+
   public function setSpecialtyNames(array $specialtyNames): static
   {
     $this->specialtyNames = $specialtyNames;
@@ -159,6 +163,7 @@ class PersonDetail
   {
     return $this->bio;
   }
+
   public function setBio(string $bio): static
   {
     $this->bio = $bio;
@@ -170,33 +175,36 @@ class PersonDetail
   {
     return $this->cover;
   }
+
   public function setCover(string $cover): static
   {
     $this->cover = $cover;
 
-    return $this;    
+    return $this;
   }
 
   public function getAvatar(): string
   {
     return $this->avatar;
   }
+
   public function setAvatar(string $avatar): static
   {
     $this->avatar = $avatar;
 
-    return $this;    
+    return $this;
   }
 
   public function getGenderId(): int
   {
     return $this->genderId;
   }
+
   public function setGenderId(int $genderId): static
   {
     $this->genderId = $genderId;
 
-    return $this;    
+    return $this;
   }
 
   public function setCreatedAt(string $createdAt): static
@@ -210,6 +218,7 @@ class PersonDetail
   {
     return $this->updatedAt;
   }
+
   public function setUpdatedAt(string $updatedAt): static
   {
     $this->updatedAt = $updatedAt;
@@ -217,10 +226,11 @@ class PersonDetail
     return $this;
   }
 
-  public function getPublisherData (): array
+  public function getPublisherData(): array
   {
     return $this->publisherData;
   }
+
   public function setPublisherData(array $publisherData): static
   {
     $this->publisherData = $publisherData;
@@ -228,6 +238,16 @@ class PersonDetail
     return $this;
   }
 
-  
+  public function setFilmWorks(array $filmWorks): static
+  {
+    $this->filmWorks = $filmWorks;
+
+    return $this;
+  }
+  public function getFilmWorks(): array
+  {
+    return $this->filmWorks;
+
+  }
 
 }
