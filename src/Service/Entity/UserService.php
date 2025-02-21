@@ -1,17 +1,20 @@
 <?php
 namespace App\Service\Entity;
 use App\Dto\Entity\UserDto;
+use App\Model\Response\Entity\User\UserDetail;
 use App\Repository\UserRepository;
 use App\Entity\User;
 use App\Exception\NotFound\UserNotFoundException;
 use App\Service\FileSystemService;
+use App\Mapper\Entity\UserMapper;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 class UserService
 {
   public function __construct(
     private readonly UserRepository $userRepository,
     private readonly UserPasswordHasherInterface $passwordHasher,
-    private FileSystemService $fileSystemService
+    private FileSystemService $fileSystemService,
+    private readonly UserMapper $userMapper
   ) {
   }
 
@@ -91,6 +94,15 @@ class UserService
   public function get(int $id): User
   {
     return $this->findForm($id);
+  }
+
+  public function edit(User $user,  UserDto $dto): UserDetail{
+    $user
+    ->setAbout($dto->about)
+    ->setAge($dto->age)
+    ->setEmail($dto->email)
+    ->setDisplayName($dto->displayName);
+    return $this->userMapper->mapToDetail($user, new UserDetail());
   }
 
 

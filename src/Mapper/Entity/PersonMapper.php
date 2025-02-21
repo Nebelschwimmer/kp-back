@@ -91,28 +91,14 @@ class PersonMapper
     return $filmIds;
   }
 
-  private function mapToFilmography(Person $person): array
-  {
-    $films = $person->getFilms()->toArray();
-
-    $filmNames = array_map(fn(Film $film) => [
-      'id' => $film->getId(),
-      'name' => $film->getName(),
-      'releaseYear' => $film->getReleaseYear(),
-      'cover' => $film->getCover() ?: '',
-    ], $films);
-
-    return $filmNames;
-  }
-
   private function mapToFilmWorks(Person $person): array
   {
     $filmWorks = [
-      'actedInFilms'=> [],
+      'actedInFilms' => [],
       'directedFilms' => [],
-      'producedFilms'=> [],
+      'producedFilms' => [],
       'composedFilms' => [],
-      'writtenFilms'=> [],
+      'writtenFilms' => [],
     ];
     $specialties = $person->getSpecialties();
     foreach ($specialties as $specialty) {
@@ -126,7 +112,7 @@ class PersonMapper
             'cover' => $film->getCover() ?: '',
           ], $films);
 
-          $filmWorks[ 'actedInFilms'] = $actedInFilms;
+          $filmWorks['actedInFilms'] = count($actedInFilms) > 0 ? $actedInFilms : null;
         case Specialty::DIRECTOR:
           $films = $person->getDirectedFilms()->toArray();
           $directedFilms = array_map(fn(Film $film) => [
@@ -136,7 +122,7 @@ class PersonMapper
             'cover' => $film->getCover() ?: '',
           ], $films);
 
-          $filmWorks['directedFilms'] = $directedFilms;
+          $filmWorks['directedFilms'] = count($directedFilms) > 0 ? $directedFilms : null;
         case Specialty::PRODUCER:
           $films = $person->getProducedFilms()->toArray();
           $producedFilms = array_map(fn(Film $film) => [
@@ -145,7 +131,7 @@ class PersonMapper
             'releaseYear' => $film->getReleaseYear(),
             'cover' => $film->getCover() ?: '',
           ], $films);
-          $filmWorks['producedFilms'] = $producedFilms;
+          $filmWorks['producedFilms'] = count($producedFilms) > 0 ? $producedFilms : null;
         case Specialty::COMPOSER:
           $films = $person->getProducedFilms()->toArray();
           $composedFilms = array_map(fn(Film $film) => [
@@ -154,7 +140,7 @@ class PersonMapper
             'releaseYear' => $film->getReleaseYear(),
             'cover' => $film->getCover() ?: '',
           ], $films);
-          $filmWorks['composedFilms'] = $composedFilms;
+          $filmWorks['composedFilms'] = count($composedFilms) > 0 ? $composedFilms : null;
         case Specialty::WRITER:
           $films = $person->getProducedFilms()->toArray();
           $writtenFilms = array_map(fn(Film $film) => [
@@ -163,7 +149,7 @@ class PersonMapper
             'releaseYear' => $film->getReleaseYear(),
             'cover' => $film->getCover() ?: '',
           ], $films);
-          $filmWorks['writtenFilms'] = $writtenFilms;
+          $filmWorks['writtenFilms'] = count($writtenFilms) > 0 ? $writtenFilms : null;
       }
     }
     return $filmWorks;
