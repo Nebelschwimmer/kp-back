@@ -1,7 +1,7 @@
 parameters:
     person_uploads: "%kernel.project_dir%/public/uploads/person"
     film_uploads: "%kernel.project_dir%/public/uploads/films"
-    user_uploads: "%kernel.project_dir%/public/uploads/user_avatars"
+    user_uploads: "%kernel.project_dir%/public/uploads/user"
     uploads_dir: "%kernel.project_dir%/public/uploads"
     public_dir: "%kernel.project_dir%/public"
 services:
