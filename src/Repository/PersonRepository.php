@@ -2,11 +2,12 @@
 
 namespace App\Repository;
 
+use App\Dto\Entity\Query\PersonQueryDto;
 use App\Entity\Person;
+use App\Repository\Traits\ActionTrait;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-use App\Dto\Entity\Query\PersonQueryDto;
-use App\Repository\Traits\ActionTrait;
+
 /**
  * @extends ServiceEntityRepository<Person>
  */
@@ -18,17 +19,16 @@ class PersonRepository extends ServiceEntityRepository
 	{
 		parent::__construct($registry, Person::class);
 	}
+
 	public function filterByQueryParams(PersonQueryDto $personQueryDto): array
 	{
-
 		$search = $personQueryDto->search;
 		$offset = $personQueryDto->offset ?? 0;
-		$limit = $personQueryDto->limit ?? 'all';
+		$limit = $personQueryDto->limit;
 		$sortBy = $personQueryDto->sortBy;
 		$order = $personQueryDto->order;
 
-		$queryBuilder = $this->createQueryBuilder('p')->where('1 = 1');
-		;
+		$queryBuilder = $this->createQueryBuilder('p')->where('1 = 1');;
 
 		if (!empty($search)) {
 			$search = trim(strtolower($search));
@@ -43,7 +43,7 @@ class PersonRepository extends ServiceEntityRepository
 		}
 		$queryBuilder
 			->orderBy("p.{$sortBy}", $order);
-		if ($limit !== 'all') {
+		if ($limit !== 0) {
 			$queryBuilder
 				->setMaxResults($limit)
 				->setFirstResult($offset);
@@ -54,10 +54,10 @@ class PersonRepository extends ServiceEntityRepository
 
 	public function total(): int
 	{
-		return $this->createQueryBuilder('p')
+		return $this
+			->createQueryBuilder('p')
 			->select('COUNT(p.id)')
 			->getQuery()
-			->getSingleScalarResult()
-		;
+			->getSingleScalarResult();
 	}
 }

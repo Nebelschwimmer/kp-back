@@ -107,11 +107,14 @@ class FilmService
 
   public function filter(FilmQueryDto $filmQueryDto): FilmPaginateList
   {
-    $filmsExist = $this->checkFilmsPresence();
-    $films = $this->repository->filterByQueryParams($filmQueryDto);
+    $totalPages = 1;
+    $currentPage = 1;
     $total = $this->repository->total();
-    $totalPages = intval(ceil($total / $filmQueryDto->limit));
-    $currentPage = $filmQueryDto->offset / $filmQueryDto->limit + 1;
+    $films = $this->repository->filterByQueryParams($filmQueryDto);
+    if ($filmQueryDto->limit !== 0) {
+      $totalPages = intval(ceil($total / $filmQueryDto->limit));
+      $currentPage = $filmQueryDto->offset / $filmQueryDto->limit + 1;
+    }
     $locale = $filmQueryDto->locale ?? 'ru';
     $items = array_map(
       fn(Film $film) => $this->filmMapper->mapToDetail($film, new FilmDetail(), $locale),
@@ -123,7 +126,7 @@ class FilmService
       $item->setGallery($galleryPaths);
     }
 
-    return new FilmPaginateList($filmsExist ? $items : [null], $totalPages, $currentPage);
+    return new FilmPaginateList($items, $totalPages, $currentPage);
   }
 
   public function create(FilmDto $dto, #[CurrentUser] User $user): FilmForm
