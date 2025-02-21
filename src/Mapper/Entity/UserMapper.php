@@ -26,7 +26,6 @@ class UserMapper
     return array_map(function (Assessment $assessment) {
       return [
         'id' => $assessment->getId(),
-        
         'comment' => $assessment->getComment(),
         'rating' => $assessment->getRating(),
         'createdAt' => $assessment->getCreatedAt(),

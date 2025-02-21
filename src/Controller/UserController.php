@@ -20,7 +20,8 @@ class UserController extends AbstractController
     public function __construct(
         private readonly UserService $userService,
         private readonly UserMapper $userMapper
-    ) {}
+    ) {
+    }
 
     #[Route('/api/current-user', name: 'api_current_user', methods: ['POST', 'GET'])]
     public function index(Request $request): JsonResponse
@@ -72,17 +73,20 @@ class UserController extends AbstractController
     }
 
     #[Route('api/users/{id}/avatar', name: 'api_user_avatar', methods: ['POST'])]
-    public function uploadAvatar(int $id, Request $request): Response
+    public function uploadAvatar(
+        Request $request , 
+        #[CurrentUser] ?User $user,
+        ): Response
     {
         $file = $request->files->get('file');
         $status = Response::HTTP_OK;
         $data = null;
         try {
-            $user = $this->userService->uploadAvatar($id, $file);
-            $data = $this->userMapper->mapToDetail($user, new UserDetail());
+            $data = $this->userService->uploadAvatar($user, $file);
+            $status = Response::HTTP_CREATED;
         } catch (\Exception $e) {
-            $status = Response::HTTP_INTERNAL_SERVER_ERROR;
             $data = $e->getMessage();
+            $status = Response::HTTP_INTERNAL_SERVER_ERROR;
         }
 
         return $this->json($data, $status);

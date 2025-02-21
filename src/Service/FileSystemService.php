@@ -54,7 +54,7 @@ class FileSystemService
     match ($entityName) {
       'person' => $dirname = $this->personPhotoDir,
       'film' => $dirname = $this->filmUploadsDir,
-      'user_avatars' => $dirname = $this->userAvatarDir,
+      'user' => $dirname = $this->userAvatarDir,
       default => $dirname = $this->defaultUploadsDir,
     };
 

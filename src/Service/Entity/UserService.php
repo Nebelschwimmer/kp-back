@@ -1,13 +1,15 @@
 <?php
 namespace App\Service\Entity;
+
 use App\Dto\Entity\UserDto;
-use App\Model\Response\Entity\User\UserDetail;
-use App\Repository\UserRepository;
 use App\Entity\User;
 use App\Exception\NotFound\UserNotFoundException;
-use App\Service\FileSystemService;
 use App\Mapper\Entity\UserMapper;
+use App\Model\Response\Entity\User\UserDetail;
+use App\Repository\UserRepository;
+use App\Service\FileSystemService;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+
 class UserService
 {
   public function __construct(
@@ -15,8 +17,7 @@ class UserService
     private readonly UserPasswordHasherInterface $passwordHasher,
     private FileSystemService $fileSystemService,
     private readonly UserMapper $userMapper
-  ) {
-  }
+  ) {}
 
   public function login(int $id): User
   {
@@ -26,15 +27,14 @@ class UserService
     return $user;
   }
 
-
   public function register(UserDto $userDto): void
   {
-
     $user = new User();
     $user
       ->setUsername($userDto->username)
       ->setRoles(['ROLE_USER'])
-      ->setPassword($this->passwordHasher
+      ->setPassword($this
+        ->passwordHasher
         ->hashPassword($user, $userDto->password));
 
     if (null !== $userDto->email) {
@@ -53,35 +53,37 @@ class UserService
     $this->userRepository->store($user);
   }
 
-  public function uploadAvatar(int $id, $file): User
+  public function uploadAvatar(User $user, $file): UserDetail
   {
-    $user = $this->find($id);
     $dirname = $this->specifyUserAvatarsPath($user->getId());
-    $currentFile = $this->fileSystemService->searchFiles($dirname, 'avatar' )[0] ?? null;
+    $currentFile = $this->fileSystemService->searchFiles($dirname, 'avatar')[0] ?? null;
     if (null !== $currentFile) {
       $this->fileSystemService->removeFile($currentFile);
     }
+
     $this->fileSystemService->upload($file, $dirname, 'avatar');
+
     $fullPath = $this->fileSystemService->searchFiles($dirname, 'avatar')[0] ?? '';
     $shortPath = $this->fileSystemService->getShortPath($fullPath);
+
     if (file_exists($fullPath)) {
       $user->setAvatar($shortPath);
       $this->userRepository->store($user);
     }
 
-    return $this->findForm($user->getId());
+    return $this->userMapper->mapToDetail($user, new UserDetail());
   }
 
   public function uploadCover(int $id, $file): User
   {
     $user = $this->find($id);
     $dirname = $this->specifyCoversPath($user->getId());
-    $currentFile = $this->fileSystemService->searchFiles($dirname, 'cover' )[0] ?? null;
+    $currentFile = $this->fileSystemService->searchFiles($dirname, )[0] ?? null;
     if (null !== $currentFile) {
       $this->fileSystemService->removeFile($currentFile);
     }
-    $this->fileSystemService->upload($file, $dirname, 'cover');
-    $fullPath = $this->fileSystemService->searchFiles($dirname, 'cover')[0] ?? '';
+    $this->fileSystemService->upload($file, $dirname, );
+    $fullPath = $this->fileSystemService->searchFiles($dirname, )[0] ?? '';
     $shortPath = $this->fileSystemService->getShortPath($fullPath);
     if (file_exists($fullPath)) {
       $user->setCover($shortPath);
@@ -96,15 +98,18 @@ class UserService
     return $this->findForm($id);
   }
 
-  public function edit(User $user,  UserDto $dto): UserDetail{
+  public function edit(User $user, UserDto $dto): UserDetail
+  {
     $user
-    ->setAbout($dto->about)
-    ->setAge($dto->age)
-    ->setEmail($dto->email)
-    ->setDisplayName($dto->displayName);
+      ->setAbout($dto->about)
+      ->setAge($dto->age)
+      ->setEmail($dto->email)
+      ->setDisplayName($dto->displayName);
+
+    $this->userRepository->store($user);
+
     return $this->userMapper->mapToDetail($user, new UserDetail());
   }
-
 
   private function find(int $id): User
   {
@@ -122,38 +127,35 @@ class UserService
     return $user;
   }
 
-
   private function specifyUserAvatarsPath(int $id): string
   {
     $subDirByIdPath = $this->createUploadsDir($id);
 
-    $photosDirPath = $subDirByIdPath . DIRECTORY_SEPARATOR;
-    $this->fileSystemService->createDir($photosDirPath);
+    $avatarDirPath = $subDirByIdPath . DIRECTORY_SEPARATOR;
+    $this->fileSystemService->createDir($avatarDirPath);
 
-    return $photosDirPath;
+    return $avatarDirPath;
   }
 
   private function specifyCoversPath(int $id): string
   {
     $subDirByIdPath = $this->createUploadsDir($id);
 
-    $photosDirPath = $subDirByIdPath . DIRECTORY_SEPARATOR;
-    $this->fileSystemService->createDir($photosDirPath);
+    $coverDirPath = $subDirByIdPath . DIRECTORY_SEPARATOR;
+    $this->fileSystemService->createDir($coverDirPath);
 
-    return $photosDirPath;
+    return $coverDirPath;
   }
 
   private function createUploadsDir(int $id): string
   {
-    $userMainUploadsDir = $this->fileSystemService->getUploadsDirname('user_avatars');
+    $userMainUploadsDir = $this->fileSystemService->getUploadsDirname('user');
 
     $stringId = strval($id);
-    $subDirByIdPath = $userMainUploadsDir . DIRECTORY_SEPARATOR . $stringId;
+    $subDirByIdPath = $userMainUploadsDir . DIRECTORY_SEPARATOR . $stringId . DIRECTORY_SEPARATOR . 'cover';
 
     $this->fileSystemService->createDir($subDirByIdPath);
 
     return $subDirByIdPath;
   }
-
-
 }
