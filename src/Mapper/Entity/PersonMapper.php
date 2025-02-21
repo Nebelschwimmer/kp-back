@@ -1,20 +1,23 @@
 <?php
 namespace App\Mapper\Entity;
+
+use App\Entity\Film;
 use App\Entity\Person;
+use App\Entity\User;
+use App\Enum\Specialty;
 use App\Model\Response\Entity\Person\PersonDetail;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use App\Model\Response\Entity\Person\PersonForm;
 use App\Model\Response\Entity\Person\PersonList;
 use App\Model\Response\Entity\Person\PersonListItem;
-use App\Entity\Film;
-use App\Enum\Specialty;
-use App\Entity\User;
+use Symfony\Contracts\Translation\TranslatorInterface;
+
+use function PHPUnit\Framework\matches;
+
 class PersonMapper
 {
   public function __construct(
     private TranslatorInterface $translator,
-  ) {
-  }
+  ) {}
 
   public function mapToEntityList(array $persons): PersonList
   {
@@ -31,10 +34,9 @@ class PersonMapper
     return $model
       ->setId($person->getId())
       ->setName($person->getFullname())
-      ->setAvatar($person->getAvatar() ?: '')
-      
-    ;
+      ->setAvatar($person->getAvatar() ?: '');
   }
+
   public function mapToListItem(Person $person): PersonListItem
   {
     return new PersonListItem(
@@ -42,9 +44,9 @@ class PersonMapper
       $person->getFullname(),
     );
   }
+
   public function mapToDetail(Person $person, PersonDetail $model, ?string $locale = null): PersonDetail
   {
-  
     return $model
       ->setId($person->getId())
       ->setFirstname($person->getFirstname())
@@ -52,7 +54,6 @@ class PersonMapper
       ->setGender($person->getGender()->trans($this->translator, $locale))
       ->setGenderId($person->getGender()->value)
       ->setBirthday($person->getBirthday()->format('Y-m-d'))
-      ->setActedInFilms($this->mapToFilmography($person))
       ->setAge($person->getAge())
       ->setSpecialtyIds($this->mapSpecialtiesToIds($person->getSpecialties()))
       ->setSpecialtyNames(array_map(fn(Specialty $specialty) => $specialty->trans($this->translator, $locale), $person->getSpecialties()))
@@ -62,7 +63,7 @@ class PersonMapper
       ->setCreatedAt($person->getCreatedAt()->format('Y-m-d'))
       ->setUpdatedAt($person->getUpdatedAt()->format('Y-m-d'))
       ->setPublisherData($person->getPublisher() ? $this->mapPublisherData($person->getPublisher()) : [])
-    ;
+      ->setFilmWorks($this->mapToFilmWorks($person));
   }
 
   public function mapToForm(Person $person, PersonForm $model): PersonForm
@@ -78,8 +79,7 @@ class PersonMapper
       ->setBio($person->getBio() ?: '')
       ->setCover($person->getCover() ?: '')
       ->setAvatar($person->getAvatar() ?: '')
-      ->setAge($person->getAge())
-    ;
+      ->setAge($person->getAge());
   }
 
   private function mapFilmsToIds(Person $person): array
@@ -105,13 +105,75 @@ class PersonMapper
     return $filmNames;
   }
 
+  private function mapToFilmWorks(Person $person): array
+  {
+    $filmWorks = [
+      'actedInFilms'=> [],
+      'directedFilms' => [],
+      'producedFilms'=> [],
+      'composedFilms' => [],
+      'writtenFilms'=> [],
+    ];
+    $specialties = $person->getSpecialties();
+    foreach ($specialties as $specialty) {
+      switch ($specialty) {
+        case Specialty::ACTOR:
+          $films = $person->getFilms()->toArray();
+          $actedInFilms = array_map(fn(Film $film) => [
+            'id' => $film->getId(),
+            'name' => $film->getName(),
+            'releaseYear' => $film->getReleaseYear(),
+            'cover' => $film->getCover() ?: '',
+          ], $films);
+
+          $filmWorks[ 'actedInFilms'] = $actedInFilms;
+        case Specialty::DIRECTOR:
+          $films = $person->getDirectedFilms()->toArray();
+          $directedFilms = array_map(fn(Film $film) => [
+            'id' => $film->getId(),
+            'name' => $film->getName(),
+            'releaseYear' => $film->getReleaseYear(),
+            'cover' => $film->getCover() ?: '',
+          ], $films);
+
+          $filmWorks['directedFilms'] = $directedFilms;
+        case Specialty::PRODUCER:
+          $films = $person->getProducedFilms()->toArray();
+          $producedFilms = array_map(fn(Film $film) => [
+            'id' => $film->getId(),
+            'name' => $film->getName(),
+            'releaseYear' => $film->getReleaseYear(),
+            'cover' => $film->getCover() ?: '',
+          ], $films);
+          $filmWorks['producedFilms'] = $producedFilms;
+        case Specialty::COMPOSER:
+          $films = $person->getProducedFilms()->toArray();
+          $composedFilms = array_map(fn(Film $film) => [
+            'id' => $film->getId(),
+            'name' => $film->getName(),
+            'releaseYear' => $film->getReleaseYear(),
+            'cover' => $film->getCover() ?: '',
+          ], $films);
+          $filmWorks['composedFilms'] = $composedFilms;
+        case Specialty::WRITER:
+          $films = $person->getProducedFilms()->toArray();
+          $writtenFilms = array_map(fn(Film $film) => [
+            'id' => $film->getId(),
+            'name' => $film->getName(),
+            'releaseYear' => $film->getReleaseYear(),
+            'cover' => $film->getCover() ?: '',
+          ], $films);
+          $filmWorks['writtenFilms'] = $writtenFilms;
+      }
+    }
+    return $filmWorks;
+  }
 
   private function matchSpecialtyIdsToTranslations(array $specialties)
   {
     foreach ($specialties as $specialty) {
       $specialtyId = $specialty->value;
       Specialty::tryFrom($specialtyId);
-
     }
   }
 
@@ -132,5 +194,4 @@ class PersonMapper
   {
     return array_map(fn(Specialty $specialty) => $specialty->trans($this->translator), $specialties);
   }
-
 }

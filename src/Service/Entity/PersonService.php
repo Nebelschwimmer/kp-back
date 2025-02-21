@@ -164,12 +164,15 @@ class PersonService
         $person = $this->find($id);
         $dirName = $this->specifyPersonPhotosPath($person->getId());
         $currentFile = $this->fileSystemService->searchFiles($dirName, 'cover')[0] ?? null;
+        
         if (null !== $currentFile) {
             $this->fileSystemService->removeFile($currentFile);
         }
+
         $this->fileSystemService->upload($file, $dirName, 'cover');
         $fullPath = $this->fileSystemService->searchFiles($dirName, 'cover')[0] ?? '';
         $shortPath = $this->fileSystemService->getShortPath($fullPath);
+        
         if (file_exists($fullPath)) {
             $person->setCover($shortPath);
             $this->repository->store($person);
@@ -184,6 +187,7 @@ class PersonService
         $person = $this->find($id);
         $dirName = $this->specifyPersonPhotosPath($person->getId());
         $foundPictures = [];
+        
         foreach ($fileNames as $fileName) {
             $foundPictures[] = $this->fileSystemService->searchFiles($dirName, $fileName);
         }
@@ -201,6 +205,7 @@ class PersonService
     {
         $persons = $this->repository->findAll();
         $directors = [];
+        
         foreach ($persons as $person) {
             $specialties = $person->getSpecialties();
             foreach ($specialties as $specialty) {

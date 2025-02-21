@@ -38,8 +38,6 @@ class Person
   #[ORM\Column(type: Types::SMALLINT, nullable: true)]
   private ?int $age = null;
 
-
-
   /**
    * @var Collection<int, Film>
    */

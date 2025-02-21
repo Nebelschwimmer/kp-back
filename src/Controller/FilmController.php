@@ -2,32 +2,32 @@
 
 namespace App\Controller;
 
+use App\Dto\Common\FileNameSearchDto;
+use App\Dto\Common\LocaleDto;
+use App\Dto\Entity\Query\FilmQueryDto;
 use App\Dto\Entity\ActorRoleDto;
+use App\Dto\Entity\AssessmentDto;
 use App\Dto\Entity\FilmDto;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpKernel\Attribute\MapQueryString;
-use App\Model\Response\Entity\Film\FilmPaginateList;
-use App\Model\Response\Entity\Film\FilmList;
-use Psr\Log\LoggerInterface;
+use App\Entity\User;
+use App\Exception\NotFound\FilmNotFoundException;
 use App\Model\Response\Entity\Film\FilmDetail;
 use App\Model\Response\Entity\Film\FilmForm;
-use Nelmio\ApiDocBundle\Attribute\Model;
-use App\Exception\NotFound\FilmNotFoundException;
-use Symfony\Component\HttpFoundation\Response;
+use App\Model\Response\Entity\Film\FilmList;
+use App\Model\Response\Entity\Film\FilmPaginateList;
 use App\Service\Entity\FilmService;
-use App\Dto\Entity\Query\FilmQueryDto;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
-use Symfony\Component\HttpFoundation\Request;
-use App\Dto\Entity\AssessmentDto;
-use App\Dto\Common\FileNameSearchDto;
-use OpenApi\Attributes as OA;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes\MediaType;
 use OpenApi\Attributes\RequestBody;
 use OpenApi\Attributes\Schema;
+use OpenApi\Attributes as OA;
+use Psr\Log\LoggerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapQueryString;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
-use App\Entity\User;
-use App\Dto\Common\LocaleDto;
 
 #[OA\Tag(name: 'Film')]
 class FilmController extends AbstractController
@@ -35,17 +35,15 @@ class FilmController extends AbstractController
   public function __construct(
     private FilmService $filmService,
     private LoggerInterface $logger,
-  ) {
-  }
+  ) {}
+
   /**
    * Find a film by id
    */
   #[Route(path: '/api/films/{id}',
     name: 'api_film',
     methods: ['GET'],
-    requirements: ['id' => '\d+']
-  )
-  ]
+    requirements: ['id' => '\d+'])]
   #[OA\Response(
     response: 200,
     description: 'Successful response',
@@ -72,9 +70,7 @@ class FilmController extends AbstractController
   #[Route(path: '/api/films/{id}/form',
     name: 'api_film_form',
     methods: ['GET'],
-    requirements: ['id' => '\d+']
-  )
-  ]
+    requirements: ['id' => '\d+'])]
   #[OA\Response(
     response: 200,
     description: 'Successful response',
@@ -96,13 +92,13 @@ class FilmController extends AbstractController
   }
 
   /**
-   * Find 5 latest films
+   * Find 10 latest films
    */
-  #[Route(path: '/api/films/latest',
+  #[Route(
+    path: '/api/films/latest',
     name: 'api_film_latest',
     methods: ['GET'],
-  )
-  ]
+  )]
   #[OA\Response(
     response: 200,
     description: 'Successful response',
@@ -110,7 +106,44 @@ class FilmController extends AbstractController
   )]
   public function latest(): Response
   {
-    return $this->json($this->filmService->latest());
+    $status = Response::HTTP_OK;
+    $data = null;
+    $count = 5;
+    try {
+      $data = $this->filmService->latest($count);
+    } catch (FilmNotFoundException $e) {
+      $status = Response::HTTP_NOT_FOUND;
+      $this->logger->error($e);
+    }
+    return $this->json($data, $status);
+  }
+
+  /**
+   * Find films with similar genres
+   */
+  #[Route(
+    path: '/api/films/similar-genres/{id}',
+    name: 'api_film_similar_genres',
+    methods: ['GET'],
+    requirements: ['id' => '\d+']
+  )]
+  #[OA\Response(
+    response: 200,
+    description: 'Successful response',
+    content: new Model(type: FilmList::class)
+  )]
+  public function similarGenre(int $id): Response
+  {
+    $status = Response::HTTP_OK;
+    $data = $this->filmService->similarGenre($id);
+    try {
+      $data = $this->filmService->similarGenre($id);
+    } catch (FilmNotFoundException $e) {
+      $status = Response::HTTP_NOT_FOUND;
+      $this->logger->error($e);
+    }
+
+    return $this->json($data, $status);
   }
 
   /**
@@ -126,7 +159,6 @@ class FilmController extends AbstractController
     description: 'Successful response',
     content: new Model(type: FilmPaginateList::class)
   )]
-
   public function filter(#[MapQueryString] ?FilmQueryDto $dto = new FilmQueryDto()): Response
   {
     return $this->json($this->filmService->filter($dto));
@@ -146,7 +178,6 @@ class FilmController extends AbstractController
     content: new Model(type: FilmForm::class)
   )]
   #[OA\Response(response: 500, description: 'An error occurred while creating the film')]
-
   public function create(
     #[MapRequestPayload] ?FilmDto $dto,
     #[CurrentUser] User $user
@@ -155,7 +186,6 @@ class FilmController extends AbstractController
     $status = Response::HTTP_OK;
 
     try {
-
       $data = $this->filmService->create($dto, $user);
     } catch (\Throwable $e) {
       $this->logger->error($e);
@@ -185,12 +215,10 @@ class FilmController extends AbstractController
     #[MapRequestPayload] ?FilmDto $dto,
     #[MapQueryString] LocaleDto $localeDto
   ): Response {
-
     $data = null;
     $status = Response::HTTP_OK;
 
     try {
-
       $data = $this->filmService->update($id, $dto, $localeDto->locale);
     } catch (\Throwable $e) {
       $this->logger->error($e);
@@ -217,7 +245,6 @@ class FilmController extends AbstractController
   public function delete(
     int $id,
   ): Response {
-
     $data = null;
     $status = Response::HTTP_OK;
 
@@ -231,7 +258,6 @@ class FilmController extends AbstractController
 
     return $this->json($data, $status);
   }
-
 
   /**
    * Upload a gallery for a film
@@ -314,6 +340,7 @@ class FilmController extends AbstractController
 
     return $this->json($data, $status);
   }
+
   #[Route(
     path: 'api/films/{id}/assess',
     name: 'api_film_assess',
@@ -333,7 +360,6 @@ class FilmController extends AbstractController
       $this->logger->error($e);
       $data = $e->getMessage();
       $status = Response::HTTP_INTERNAL_SERVER_ERROR;
-
     }
     return $this->json($data, $status);
   }
@@ -341,7 +367,6 @@ class FilmController extends AbstractController
   /**
    * Check films presence in the DB
    */
-
   #[Route(
     path: 'api/films/check',
     name: 'api_film_check',
@@ -351,13 +376,10 @@ class FilmController extends AbstractController
     response: 200,
     description: 'Successful response',
   )]
-
   public function checkEmpty(): Response
   {
     return $this->json(
       ['present' => $this->filmService->checkFilmsPresence()]
     );
   }
-
-
 }
