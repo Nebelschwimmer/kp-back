@@ -4,6 +4,7 @@ namespace App\Enum;
 
 use Symfony\Contracts\Translation\TranslatableInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use App\Enum\Gender;
 
 enum Specialty: int implements TranslatableInterface
 {
@@ -15,10 +16,10 @@ enum Specialty: int implements TranslatableInterface
     case EDITOR = 6;
 
 
-    public function trans(TranslatorInterface $translator, ?string $locale = null): string
+    public function trans(TranslatorInterface $translator, ?string $locale = null, $gender = Gender::MALE): string
     {
         return match ($this) {
-            self::ACTOR => $translator->trans('actor', locale: $locale, domain: 'specialty'),
+            self::ACTOR => $translator->trans( $gender === Gender::MALE ? 'actor' : 'actress', locale: $locale, domain: 'specialty'),
             self::DIRECTOR => $translator->trans('director', locale: $locale, domain: 'specialty'),
             self::PRODUCER => $translator->trans('producer', locale: $locale, domain: 'specialty'),
             self::WRITER => $translator->trans('writer', locale: $locale, domain: 'specialty'),
@@ -30,6 +31,8 @@ enum Specialty: int implements TranslatableInterface
     {
         return array_column(self::cases(), 'value');
     }
+
+
 
     public static function isValid(int $value): bool
     {
