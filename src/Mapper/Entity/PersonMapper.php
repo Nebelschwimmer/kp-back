@@ -17,7 +17,8 @@ class PersonMapper
 {
   public function __construct(
     private TranslatorInterface $translator,
-  ) {}
+  ) {
+  }
 
   public function mapToEntityList(array $persons): PersonList
   {
@@ -152,7 +153,8 @@ class PersonMapper
           $filmWorks['writtenFilms'] = count($writtenFilms) > 0 ? $writtenFilms : null;
       }
     }
-    return $filmWorks;
+    
+    return array_filter($filmWorks, fn($filmWork) => $filmWork !== null);
   }
 
   private function matchSpecialtyIdsToTranslations(array $specialties)
