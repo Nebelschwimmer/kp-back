@@ -11,8 +11,6 @@ use App\Model\Response\Entity\Person\PersonList;
 use App\Model\Response\Entity\Person\PersonListItem;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-use function PHPUnit\Framework\matches;
-
 class PersonMapper
 {
   public function __construct(
@@ -57,7 +55,7 @@ class PersonMapper
       ->setBirthday($person->getBirthday()->format('Y-m-d'))
       ->setAge($person->getAge())
       ->setSpecialtyIds($this->mapSpecialtiesToIds($person->getSpecialties()))
-      ->setSpecialtyNames(array_map(fn(Specialty $specialty) => $specialty->trans($this->translator, $locale), $person->getSpecialties()))
+      ->setSpecialtyNames($this->mapSpecialtyNamesIncludingGender($person, $locale))
       ->setBio($person->getBio() ?: '')
       ->setCover($person->getCover() ?: '')
       ->setAvatar($person->getAvatar() ?: '')
@@ -82,6 +80,16 @@ class PersonMapper
       ->setAvatar($person->getAvatar() ?: '')
       ->setAge($person->getAge());
   }
+
+  public function mapSpecialtyNamesIncludingGender(Person $person, ?string $locale): array
+  {
+    return array_map(fn(Specialty $specialty) => $specialty->trans(
+      $this->translator, 
+      $locale, 
+      $person->getGender()), $person->getSpecialties());
+  }
+
+
 
   private function mapFilmsToIds(Person $person): array
   {
@@ -153,7 +161,7 @@ class PersonMapper
           $filmWorks['writtenFilms'] = count($writtenFilms) > 0 ? $writtenFilms : null;
       }
     }
-    
+
     return array_filter($filmWorks, fn($filmWork) => $filmWork !== null);
   }
 
