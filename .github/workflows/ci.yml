@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - dev
   pull_request: ~
   workflow_dispatch: ~
 
@@ -77,6 +77,6 @@ jobs:
           script: |
             whoami
             cd ~/kp-back || git clone https://github.com/Nebelschwimmer/kp-back.git && cd kp-back
-            git pull origin main
+            git pull origin dev
             docker compose down
             docker compose up -d
