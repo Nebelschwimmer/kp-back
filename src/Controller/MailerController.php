@@ -10,8 +10,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class MailerController extends AbstractController
 {
-    #[Route('/email')]
-    public function sendEmail(MailerInterface $mailer): void
+    #[Route('api/email', name:'api_email', methods: ['POST', "GET"])]
+    public function sendEmail(MailerInterface $mailer): Response
     {
         $email = (new Email())
             ->from('hello@example.com')
@@ -26,6 +26,6 @@ class MailerController extends AbstractController
 
         $mailer->send($email);
 
-        // ...
+        return $this->json(['success' => true]);
     }
 }
