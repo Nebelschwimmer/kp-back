@@ -77,12 +77,6 @@ jobs:
           script: |
             whoami
             cd ~/kp-back || git clone https://github.com/Nebelschwimmer/kp-back.git && cd kp-back
-            if ! git diff --quiet; then
-              git stash push -m "Stashing changes before switching branch"
-              echo "Изменения были отправлены в stash."
-            else
-              echo "Нет незакоммиченных изменений."
-            fi
             git pull origin main
             docker compose down
             docker compose up -d
