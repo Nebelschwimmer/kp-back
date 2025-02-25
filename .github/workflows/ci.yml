@@ -75,60 +75,11 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            # whoami
-            # cd ~/kp-back
-            # ls -l
-            # if [ -d .git ]; then
-            #   git fetch origin main
-            # else
-            #   git clone https://github.com/Nebelschwimmer/kp-back.git
-            # fi
-            # git checkout main
-            # git pull
-            # docker compose down
-            # docker compose up -d
-            #!/bin/bash
-            # Логируем начало выполнения
-            echo "Starting deployment..."
-
-            # Логируем начало выполнения
-            echo "Starting deployment..."
-
-            # Проверяем, кто выполняет скрипт
-            echo "Running as user: $(whoami)"
-
-            # Переходим в домашнюю директорию
-            cd ~ || { echo "Failed to switch to home directory!"; exit 1; }
-
-            # Удаляем старую директорию, если она существует
-            if [ -d "kp-back" ]; then
-              echo "Removing old kp-back directory..."
-              sudo rm -rf kp-back || { echo "Failed to remove old directory!"; exit 1; }
-            fi
-
-            # Клонируем репозиторий
-            echo "Cloning repository..."
-            git clone https://github.com/Nebelschwimmer/kp-back.git kp-back || { echo "Failed to clone repository!"; exit 1; }
-
-            # Переходим в директорию проекта
-            cd kp-back || { echo "Directory kp-back not found!"; exit 1; }
-
-            # Переключаемся на ветку main и обновляем её
-            echo "Checking out main branch..."
-            git checkout main || { echo "Failed to checkout main branch!"; exit 1; }
-            echo "Pulling latest changes..."
-            git pull || { echo "Failed to pull latest changes!"; exit 1; }
-
-            # Останавливаем и запускаем контейнеры
-            echo "Stopping existing containers..."
-            docker compose down || { echo "Failed to stop containers!"; exit 1; }
-
-            echo "Starting containers..."
-            docker compose up -d || { echo "Failed to start containers!"; exit 1; }
-
-            # Проверяем статус контейнеров
-            echo "Container status:"
-            docker compose ps
-
-            # Логируем завершение
-            echo "Deployment completed!"
+            whoami
+            cd ~/kp-back/kp-back
+            docker compose down
+            docker system prune -f
+            cd .. 
+            git pull origin main
+            docker compose down
+            docker compose up -d
