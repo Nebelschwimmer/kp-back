@@ -76,10 +76,9 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             whoami
-            # cd ~/kp-back || git clone https://github.com/Nebelschwimmer/kp-back.git && cd kp-back
-            rm -rf kp-back  
-            git clone https://github.com/Nebelschwimmer/kp-back.git
-            # git pull origin dev
-            cd kp-back
+            git checkout dev
+            git pull origin dev
+            git checkout main
+            git merge dev
             docker compose down
-            docker compose up --build
+            docker compose up -d
