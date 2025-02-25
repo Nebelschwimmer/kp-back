@@ -107,7 +107,7 @@ jobs:
               git fetch origin main || { echo "Failed to fetch from origin!"; exit 1; }
             else
               echo "Cloning repository..."
-              git clone https://github.com/... . || { echo "Failed to clone repository!"; exit 1; }
+              git clone https://github.com/Nebelschwimmer/kp-back.git . || { echo "Failed to clone repository!"; exit 1; }
             fi
 
             # Переключаемся на ветку main и обновляем её
