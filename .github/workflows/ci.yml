@@ -75,15 +75,59 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            whoami
-            cd ~/kp-back
+            # whoami
+            # cd ~/kp-back
+            # ls -l
+            # if [ -d .git ]; then
+            #   git fetch origin main
+            # else
+            #   git clone https://github.com/Nebelschwimmer/kp-back.git
+            # fi
+            # git checkout main
+            # git pull
+            # docker compose down
+            # docker compose up -d
+            #!/bin/bash
+            # Логируем начало выполнения
+            echo "Starting deployment..."
+
+            # Проверяем, кто выполняет скрипт
+            echo "Running as user: $(whoami)"
+
+            # Переходим в директорию проекта
+            cd ~/kp-back || { echo "Directory ~/kp-back not found!"; exit 1; }
+
+            # Выводим содержимое директории
+            echo "Directory contents:"
             ls -l
+
+            # Обновляем или клонируем репозиторий
             if [ -d .git ]; then
-              git fetch origin main
+              echo "Updating repository..."
+              git fetch origin main || { echo "Failed to fetch from origin!"; exit 1; }
             else
-              git clone https://github.com/Nebelschwimmer/kp-back.git
+              echo "Cloning repository..."
+              git clone https://github.com/... . || { echo "Failed to clone repository!"; exit 1; }
             fi
-            git checkout main
-            git pull
-            docker compose down
-            docker compose up -d
+
+            # Переключаемся на ветку main и обновляем её
+            echo "Checking out main branch..."
+            git checkout main || { echo "Failed to checkout main branch!"; exit 1; }
+            echo "Pulling latest changes..."
+            git pull || { echo "Failed to pull latest changes!"; exit 1; }
+
+            # Останавливаем и запускаем контейнеры
+            echo "Stopping existing containers..."
+            docker compose down || { echo "Failed to stop containers!"; exit 1; }
+
+            echo "Starting containers..."
+            docker compose up -d || { echo "Failed to start containers!"; exit 1; }
+
+            # Проверяем статус контейнеров
+            echo "Container status:"
+            docker compose ps
+
+            # Логируем завершение
+            echo "Deployment completed!"
+
+            # Выводим содержимое директории после выполнения скрипта
