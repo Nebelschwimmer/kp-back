@@ -95,9 +95,7 @@ class PersonMapper
   {
     $films = $person->getFilms()->toArray();
 
-    $filmIds = array_map(fn(Film $film) => $film->getId(), $films);
-
-    return $filmIds;
+    return array_map(fn(Film $film) => $film->getId(), $films);
   }
 
   private function mapToFilmWorks(Person $person): array
