@@ -78,9 +78,7 @@ jobs:
             whoami
             cd ~/kp-back
             docker ps
-            docker exec -i kp-back-php-1 bash
-            php -v && php bin/console lexik:jwt:generate-keypair
-            exit
+            docker exec -i kp-back-php-1 bash -c "php -v && php bin/console lexik:jwt:generate-keypair"
             git pull
             docker compose down
             docker compose up -d
