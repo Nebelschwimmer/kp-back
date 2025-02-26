@@ -30,7 +30,7 @@ security:
                 provider: null
                 authenticator: lexik_jwt_authentication.security.jwt_authenticator
             logout:
-                path: api_logout
+                path: api_token_invalidate
             refresh_jwt:
                 check_path: /api/token/refresh # or, you may use the `api_refresh_token` route name
                 # or if you have more than one user provider

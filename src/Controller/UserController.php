@@ -24,14 +24,16 @@ class UserController extends AbstractController
     }
 
     #[Route('/api/current-user', name: 'api_current_user', methods: ['POST', 'GET'])]
-    public function index(Request $request): JsonResponse
+    public function index(Request $request): Response
     {
         $token = $request->headers->get('Authorization');
         if (null === $token) {
             return $this->json(['error' => 'Token not found']);
         }
+        
         $user = $this->getUser();
-        if ($user !== null) {
+
+        if (null !==  $user) {
             $user->setLastLogin(new \DateTime());
             $mappedUser = $this->userMapper->mapToDetail($user, new UserDetail());
         }
