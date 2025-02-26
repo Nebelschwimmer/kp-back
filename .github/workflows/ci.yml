@@ -77,7 +77,8 @@ jobs:
           script: |
             whoami
             cd ~/kp-back
-            docker exect -it kp-back-php-1 bash
+            sed -n 's/^MAILER_DSN=//p' .env
+            docker exec -it kp-back-php-1 bash
             php bin/console lexik:jwt:generate-keypair
             exit 
             git pull
