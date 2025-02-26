@@ -76,10 +76,8 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             whoami
-            cd ~/kp-back/kp-back
-            docker compose down
-            docker system prune -f
-            cd .. 
-            git pull origin main
+            cd ~/kp-back
+            php bin/console lexik:jwt:generate-keypair 
+            git pull
             docker compose down
             docker compose up -d
