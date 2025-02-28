@@ -91,7 +91,7 @@ class Person
     $this->actedInFilms = new ArrayCollection();
     $this->directedFilms = new ArrayCollection();
     $this->producedFilms = new ArrayCollection();
-    $this->writtenFlms = new ArrayCollection();
+    $this->writtenFilms = new ArrayCollection();
   }
 
 

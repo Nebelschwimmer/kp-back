@@ -2,8 +2,6 @@
 
 namespace App\Model\Response\Entity\User;
 
-use Symfony\Component\ExpressionLanguage\Node\FunctionNode;
-
 class UserDetail
 {
   public ?int $id;
